@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas y Nube de Palabras</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+</head>
+<body class="bg-gray-200">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-lg font-semibold">Estadísticas y Nube de Palabras</a>
+            <div>
+                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <form id="filtroForm" class="mb-8">
+            <!-- Inputs: Cliente, Estado, Municipio -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label for="cliente" class="block text-sm font-medium text-gray-700">Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="estado" class="block text-sm font-medium text-gray-700">Estado:</label>
+                    <input type="text" id="estado" name="estado" class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="municipio" class="block text-sm font-medium text-gray-700">Municipio:</label>
+                    <input type="text" id="municipio" name="municipio" class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Filtrar</button>
+        </form>
+
+        <!-- Flex Container for Word Frequencies and Word Cloud -->
+        <div class="flex flex-wrap -mx-2">
+            <!-- Word Frequencies -->
+            <div class="w-full md:w-1/2 px-2 mb-4">
+                <h2 class="text-xl font-bold">Frecuencias de Palabras</h2>
+                <div id="buscarFrecuencia" class="mb-4">
+                    <label for="buscadorPalabras" class="block text-sm font-medium text-gray-700">Buscar palabra:</label>
+                    <input type="text" id="buscadorPalabras" placeholder="Escribe para filtrar..." class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div id="frecuenciasPalabras" class="overflow-auto" style="height: 400px; width: 100%;"></div>
+                <button id="generarNube" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Generar Nube de Palabras</button>
+            </div>
+
+            <!-- Word Cloud -->
+            <div class="w-full md:w-1/2 px-2 mb-8">
+                <h2 class="text-xl font-bold">Nube de Palabras</h2>
+                <div id="nubePalabras" class="w-full h-400px border-2 border-gray-300"></div>
+            </div>
+        </div>
+
+        <!-- Detailed Data -->
+        <div class="mt-8">
+            <h2 class="text-xl font-bold my-4">Datos Detallados</h2>
+            <div class="relative overflow-y-auto max-h-[500px] shadow rounded-lg">
+                <table id="tablaDatos" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Municipio</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Texto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Data rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        let frecuenciasModificadas = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('filtroForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Evita que el formulario se envíe de manera tradicional.
+                const cliente = document.getElementById('cliente').value;
+                const estado = document.getElementById('estado').value;
+                const municipio = document.getElementById('municipio').value;
+                let url = 'http://127.0.0.1:8000/palabras_admin/api/extraccion4/';
+                let params = new URLSearchParams({cliente, estado, municipio}).toString();
+                url += '?' + params;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.getElementById('tablaDatos').getElementsByTagName('tbody')[0];
+                        tbody.innerHTML = ''; // Limpia los datos anteriores
+                        let todoTexto = ''; // Acumula todo el texto
+                        data.forEach(item => {
+                            let row = tbody.insertRow();
+                            row.insertCell(0).innerHTML = item.cliente;
+                            row.insertCell(1).innerHTML = item.estado;
+                            row.insertCell(2).innerHTML = item.municipio;
+                            row.insertCell(3).innerHTML = item.text_data;
+                            todoTexto += item.text_data + ' ';
+                        });
+
+                        const frecuencias = procesarTextoParaNube(todoTexto);
+                        mostrarFrecuencias(frecuencias); // Muestra las frecuencias para edición
+                    })
+                    .catch(error => console.error('Error al cargar los datos:', error));
+            });
+
+            document.getElementById('generarNube').addEventListener('click', function() {
+                const contenedor = document.getElementById('frecuenciasPalabras');
+                const inputsTexto = contenedor.querySelectorAll('input[type="text"]');
+                const inputsFrecuencia = contenedor.querySelectorAll('input[type="number"]');
+
+                const frecuenciasModificadas = [];
+                inputsTexto.forEach((input, index) => {
+                    const texto = input.value;
+                    const frecuencia = parseInt(inputsFrecuencia[index].value, 10);
+                    if (texto && !isNaN(frecuencia) && frecuencia > 0) {
+                        frecuenciasModificadas.push({text: texto, size: frecuencia});
+                    }
+                });
+
+                generarNubeDePalabras(frecuenciasModificadas); // Genera la nube con las frecuencias modificadas
+            });
+
+            function mostrarFrecuencias(frecuencias) {
+                const contenedor = document.getElementById('frecuenciasPalabras');
+                const buscador = document.getElementById('buscadorPalabras');
+        
+                // Actualiza frecuenciasModificadas si es la primera vez
+                if (frecuenciasModificadas.length === 0) {
+                    frecuenciasModificadas = frecuencias.slice();
+                }
+        
+                const filtrarYMostrar = () => {
+                    const textoBusqueda = buscador.value.toLowerCase();
+                    contenedor.innerHTML = ''; // Limpia el contenedor para la nueva lista filtrada
+                    
+                    frecuenciasModificadas
+                        .filter(frecuencia => frecuencia.text.toLowerCase().includes(textoBusqueda))
+                        .forEach(frecuencia => {
+                            const div = document.createElement('div');
+                            const inputTexto = document.createElement('input');
+                            inputTexto.type = 'text';
+                            inputTexto.value = frecuencia.text;
+                            inputTexto.onchange = (e) => {
+                                // Encuentra y actualiza la frecuencia en frecuenciasModificadas
+                                const item = frecuenciasModificadas.find(f => f.text === e.target.value);
+                                if (item) {
+                                    item.text = e.target.value;
+                                }
+                            };
+        
+                            const inputFrecuencia = document.createElement('input');
+                            inputFrecuencia.type = 'number';
+                            inputFrecuencia.value = frecuencia.size;
+                            inputFrecuencia.onchange = (e) => {
+                                // Encuentra y actualiza la frecuencia en frecuenciasModificadas
+                                const item = frecuenciasModificadas.find(f => f.text === inputTexto.value);
+                                if (item) {
+                                    item.size = parseInt(e.target.value, 10);
+                                }
+                            };
+        
+                            div.appendChild(inputTexto);
+                            div.appendChild(inputFrecuencia);
+                            contenedor.appendChild(div);
+                        });
+                };
+        
+                // Asegúrate de llamar a filtrarYMostrar para mostrar todos los datos inicialmente
+                filtrarYMostrar();
+        
+                // Actualiza la lista según la búsqueda del usuario
+                buscador.addEventListener('input', filtrarYMostrar);
+            }
+            
+
+            function procesarTextoParaNube(texto) {
+                const stopWords = ["en", "con", "tal", "y", "o", "para", "como", "los", "las", "un", "una", "de", "que", "el", "la", "por", "mi", "mis", "tu", "tus", "su", "sus", "al", "del"];
+                const palabrasExcluidas = new Set(["negro", "est", "uas", "caf", "porno", "xxx", ".", "ab", "esta", "oz", "ttp", "tro", "ls", "sr", "si", "pcs", "ah", "aun", "tb", "efe", "gel", "xx", "z", "sms", "voc", "seu", "rib", "espa", "sexy", "viu", "smart", "only", "etc", "sexo", "voce", "es", "per", "tim", ...stopWords]);
+                
+                const palabras = texto.split(/\s+/);
+                const frecuencias = {};
+        
+                palabras.forEach(palabra => {
+                    const palabraLimpia = palabra.replace(/[^\w\s']|_/g, "").trim();
+                    if (palabraLimpia && !palabrasExcluidas.has(palabraLimpia.toLowerCase()) && !/^\d+$/.test(palabraLimpia) && palabraLimpia.length > 2) {
+                        const palabraContar = palabraLimpia;
+                        frecuencias[palabraContar] = (frecuencias[palabraContar] || 0) + 1;
+                    }
+                });
+        
+                return Object.entries(frecuencias).map(([texto, size]) => ({text: texto, size})).sort((a, b) => b.size - a.size);
+            }
+        
+            function generarNubeDePalabras(frecuenciasModificadas) {
+                // Clear any existing SVG to prevent overlaps
+                d3.select("#nubePalabras svg").remove();
+            
+                // Define the dimensions of the SVG container
+                const width = 600;
+                const height = 400;
+                const fill = d3.scaleOrdinal(d3.schemeCategory10); // For color scale
+            
+                // Set up the font size scale
+                const sizeScale = d3.scaleSqrt()
+                    .domain([0, d3.max(frecuenciasModificadas, d => d.size)]) // From 0 to the max frequency
+                    .range([10, 100]); // Minimum size and maximum size of the words
+            
+                // Create the layout algorithm
+                const layout = d3.layout.cloud()
+                    .size([width, height])
+                    .words(frecuenciasModificadas)
+                    .padding(5)
+                    .rotate(() => 0) // Keep all words horizontal
+                    .fontSize(d => sizeScale(d.size)) // Apply the size scale to the font size
+                    .on("end", draw);
+            
+                // Start the word cloud layout
+                layout.start();
+            
+                // Function to draw the word cloud after the layout calculations
+                function draw(words) {
+                    // Crea el elemento SVG
+                    const svg = d3.select("#nubePalabras").append("svg")
+                        .attr("width", layout.size()[0])
+                        .attr("height", layout.size()[1])
+                        .append("g")
+                        .attr("transform", `translate(${layout.size()[0] / 2},${layout.size()[1] / 2})`);
+                
+                    // Dibuja las palabras
+                    svg.selectAll("text")
+                        .data(words)
+                        .enter().append("text")
+                        .style("font-family", "Impact")
+                        .style("fill", (d, i) => fill(i))
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", d => `${d.size}px`)
+                        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+                        .text(d => d.text)
+                        .each(function(d) {
+                            animateWord(d3.select(this), d);
+                        });
+                }
+                
+                function animateWord(word, data) {
+                    // Define aquí la lógica de movimiento, por ejemplo, un simple movimiento vertical
+                    const duration = 2000 + Math.random() * 3000; // Duración aleatoria para más naturalidad
+                    const yMovement = 20 + Math.random() * 20; // Rango de movimiento aleatorio
+                
+                    function move() {
+                        word.transition()
+                            .duration(duration)
+                            .attrTween("transform", function() {
+                                return function(t) {
+                                    // Calcula la nueva posición 'y' basada en el tiempo 't'
+                                    const newY = data.y + Math.sin(t * 2 * Math.PI) * yMovement;
+                                    return `translate(${data.x}, ${newY})`;
+                                };
+                            })
+                            .on("end", move); // Al terminar, inicia la animación nuevamente
+                    }
+                
+                    move(); // Inicia la animación
+                }
+            }
+            
+            
+            
+        });
+    </script>
+</body>
+</html>

@@ -5,9 +5,11 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+import uuid
 from django.db import models
 from .roles import ADMIN_ROLE, VIEWER 
 from django.contrib.auth.models import User
+from django.conf import settings
 
 class Extraccion(models.Model):
     chat_row_id = models.IntegerField(blank=True, null=True)
@@ -100,4 +102,11 @@ class UserProfile(models.Model):
     ])
     def __str__(self):
         return self.user.username
+
+class DatosCompartidos(models.Model):
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    datos = models.JSONField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+    identificador_unico = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    # Agrega más campos según sea necesario
     

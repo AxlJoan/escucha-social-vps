@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'palabras_admin',
     'rest_framework',
     'corsheaders',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
