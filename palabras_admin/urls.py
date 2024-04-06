@@ -21,5 +21,8 @@ from .views import Extraccion4List
 
 urlpatterns = [
     path('api/extraccion4/', Extraccion4List.as_view(), name='extraccion4-list'),
-    path('nube_admin/',views.admin,name='nube_admin')
+    path('nube_admin/',views.admin,name='nube_admin'),
+    path('api/compartir/', views.compartir, name='compartir'),
+    path('ver_compartido/<uuid:uuid>/', views.ver_compartido, name='ver_compartido'),
+
 ]

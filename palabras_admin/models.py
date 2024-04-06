@@ -110,3 +110,10 @@ class DatosCompartidos(models.Model):
     identificador_unico = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     # Agrega más campos según sea necesario
     
+
+class PalabraCompartida(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    datos = models.JSONField()
+
+    def __str__(self):
+        return str(self.id)

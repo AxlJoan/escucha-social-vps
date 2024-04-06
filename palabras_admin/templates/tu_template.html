@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palabra Compartida</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <nav class="bg-gray-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-lg font-semibold">Visualización de Palabras Compartidas</a>
+            <div>
+                <a href="/" class="px-4 hover:text-gray-300">Inicio</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-8">
+        <div class="mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Nube de Palabras Compartida</h1>
+            <p class="text-gray-600">A continuación se muestra la visualización de las palabras compartidas.</p>
+        </div>
+frecuencia
+        <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="text-xl font-semibold mb-2">Frecuencias de Palabras</h2>
+            <!-- Aquí se asume que 'datos' es un diccionario o una lista de tuplas (palabra, frecuencia) -->
+            {% for palabra, frecuencia in datos %}
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-gray-800">{{ palabra }}</span>
+                    <span class="text-blue-500">{{ frecuencia }}</span>
+                </div>
+            {% empty %}
+                <p>No se encontraron palabras compartidas.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>
