@@ -8,6 +8,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 import json  # Importar módulo json
 from collections import Counter
+from django.views.generic import ListView
+from django.db.models import Count
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class Extraccion4List(generics.ListAPIView):
     queryset = Extraccion4.objects.all()
@@ -50,3 +53,43 @@ def ver_compartido(request, uuid):
     
     # Pasar los datos procesados al contexto del template
     return render(request, 'tu_template.html', {'datos': datos})
+
+
+class Vista_Analisis(ListView):
+    model = Extraccion4
+    template_name = 'analisis.html'
+    context_object_name = 'extracciones'
+    paginate_by = 100  # Ajusta este número según lo que sea manejable para tu página
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        self.filterset = Extraccion4Filter(self.request.GET, queryset=queryset)
+        return self.filterset.qs.distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.filterset.qs.distinct()  # Asegúrate de que el queryset esté filtrado
+
+        # Paginación
+        page = self.request.GET.get('page')
+        paginator = Paginator(queryset, self.paginate_by)
+
+        try:
+            extracciones = paginator.page(page)
+        except PageNotAnInteger:
+            extracciones = paginator.page(1)
+        except EmptyPage:
+            extracciones = paginator.page(paginator.num_pages)
+
+        # Calcula el total de grupos únicos basado en el queryset filtrado
+        if self.request.GET:
+            group_names = queryset.values_list('group_name', flat=True).distinct()
+            total_unique_groups = len(set(group_names))
+        else:
+            total_unique_groups = None
+
+        # Agregar la paginación y el filtro al contexto
+        context['extracciones'] = extracciones
+        context['total_unique_groups'] = total_unique_groups
+        context['filterset'] = self.filterset
+        return context

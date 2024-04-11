@@ -8,8 +8,9 @@
     <title>Estadísticas y Nube de Palabras</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jasondavies/d3-cloud/build/d3.layout.cloud.js"></script>
+
 </head>
 <body class="bg-gray-200">
 
@@ -23,7 +24,7 @@
             </div>
         </div>
     </nav>
-
+    
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
         <form id="filtroForm" class="mb-8">
@@ -44,9 +45,11 @@
             </div>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Filtrar</button>
         </form>
+        <div id="contadorGrupos" class="mt-2 text-lg font-semibold"></div>
 
         <!-- Flex Container for Word Frequencies and Word Cloud -->
         <div class="flex flex-wrap -mx-2">
+
             <!-- Word Frequencies -->
             <div class="w-full md:w-1/2 px-2 mb-4">
                 <h2 class="text-xl font-bold">Frecuencias de Palabras</h2>
@@ -60,6 +63,7 @@
 
             <!-- Word Cloud -->
             <div class="w-full md:w-1/2 px-2 mb-8">
+                
                 <h2 class="text-xl font-bold">Nube de Palabras</h2>
                 <div id="nubePalabras" class="w-full h-400px border-2 border-gray-300"></div>
             </div>
@@ -78,6 +82,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Municipio</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Texto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
+
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -100,6 +106,7 @@
                 let url = 'http://127.0.0.1:8000/palabras_admin/api/extraccion4/';
                 let params = new URLSearchParams({cliente, estado, municipio}).toString();
                 url += '?' + params;
+                
 
                 fetch(url)
                     .then(response => response.json())
@@ -107,6 +114,8 @@
                         const tbody = document.getElementById('tablaDatos').getElementsByTagName('tbody')[0];
                         tbody.innerHTML = ''; // Limpia los datos anteriores
                         let todoTexto = ''; // Acumula todo el texto
+                        let grupos = new Set(); // Almacena los grupos únicos
+
                         data.forEach(item => {
                             let row = tbody.insertRow();
                             row.insertCell(0).innerHTML = item.cliente;
@@ -114,7 +123,11 @@
                             row.insertCell(2).innerHTML = item.municipio;
                             row.insertCell(3).innerHTML = item.text_data;
                             todoTexto += item.text_data + ' ';
+                            row.insertCell(4).innerHTML = item.group_name;
+                            grupos.add(item.group_name); // Añade el nombre del grupo al conjunto
+
                         });
+                        document.getElementById('contadorGrupos').textContent = `Total de Grupos: ${grupos.size}`;
 
                         const frecuencias = procesarTextoParaNube(todoTexto);
                         mostrarFrecuencias(frecuencias); // Muestra las frecuencias para edición
@@ -300,6 +313,7 @@
             },
             body: JSON.stringify({
                 frecuencias: frecuenciasModificadas
+                totalGrupos: totalGrupos
                 // Aquí puedes agregar cualquier otro dato relevante que necesites compartir
             })
         })

@@ -17,12 +17,13 @@ Including another URLconf
 from django.urls import path,include
 from rest_framework import routers
 from palabras_admin import views
-from .views import Extraccion4List
+from .views import Extraccion4List,Vista_Analisis
 
 urlpatterns = [
     path('api/extraccion4/', Extraccion4List.as_view(), name='extraccion4-list'),
     path('nube_admin/',views.admin,name='nube_admin'),
     path('api/compartir/', views.compartir, name='compartir'),
     path('ver_compartido/<uuid:uuid>/', views.ver_compartido, name='ver_compartido'),
+    path('analisis/', Vista_Analisis.as_view(), name='extraccion4_list'),
 
 ]

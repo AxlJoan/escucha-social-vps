@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palabra Compartida</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    {% if total_unique_groups %}
+<div>
+    Total de Grupos Únicos: {{ total_unique_groups }}
+</div>
+{% endif %}
+    <form method="get">
+        {{ filterset.form.as_p }}
+        <button type="submit">Filtrar</button>
+    </form>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Text Data</th>
+                <th>From Me</th>
+                <th>Number</th>
+                <th>Number 2</th>
+                <th>Group Name</th>
+                <th>Description</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Municipio</th>
+                <th>Número de Grupos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for extraccion in extracciones %}
+            <tr>
+                <td>{{ extraccion.text_data }}</td>
+                <td>{{ extraccion.from_me }}</td>
+                <td>{{ extraccion.number }}</td>
+                <td>{{ extraccion.number2 }}</td>
+                <td>{{ extraccion.group_name }}</td>
+                <td>{{ extraccion.description }}</td>
+                <td>{{ extraccion.cliente }}</td>
+                <td>{{ extraccion.estado }}</td>
+                <td>{{ extraccion.municipio }}</td>
+                <td>{{ extraccion.num_grupos }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if extracciones.has_previous %}
+                <a href="?{{ request.GET.urlencode }}&page=1">&laquo; first</a>
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.previous_page_number }}">previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ extracciones.number }} of {{ extracciones.paginator.num_pages }}.
+            </span>
+            
+            {% if extracciones.has_next %}
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.next_page_number }}">next</a>
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</body>
+</html>
