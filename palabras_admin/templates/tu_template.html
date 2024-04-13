@@ -1,41 +1,98 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palabra Compartida</title>
+    <title>Shared Words View</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud/build/d3.layout.cloud.js"></script>
 </head>
-<body class="bg-gray-100">
-
+<body class="bg-gray-100 font-sans">
     <nav class="bg-gray-800 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-lg font-semibold">Visualización de Palabras Compartidas</a>
+            <a href="#" class="text-lg font-semibold">Estadísticas y Nube de Palabras</a>
             <div>
-                <a href="/" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
             </div>
         </div>
     </nav>
-
-    <div class="container mx-auto p-8">
-        <div class="mb-4">
-            <h1 class="text-2xl font-bold text-gray-800">Nube de Palabras Compartida</h1>
-            <p class="text-gray-600">A continuación se muestra la visualización de las palabras compartidas.</p>
-        </div>
-frecuencia
-        <div class="bg-white shadow rounded-lg p-4">
-            <h2 class="text-xl font-semibold mb-2">Frecuencias de Palabras</h2>
-            <!-- Aquí se asume que 'datos' es un diccionario o una lista de tuplas (palabra, frecuencia) -->
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800">Word Frequencies</h1>
+        <p class="text-xl text-center my-4 text-gray-600">Total Groups: {{ totalGrupos }}</p>
+        <div id="wordcloud" class="w-full h-auto bg-white rounded-lg shadow-lg my-4"></div>
+        <ul class="list-disc space-y-2 p-5 bg-white rounded-lg shadow">
             {% for palabra, frecuencia in datos %}
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-gray-800">{{ palabra }}</span>
-                    <span class="text-blue-500">{{ frecuencia }}</span>
-                </div>
-            {% empty %}
-                <p>No se encontraron palabras compartidas.</p>
+            <li class="text-gray-700">{{ palabra }}: <span class="text-blue-600">{{ frecuencia }}</span></li>
             {% endfor %}
-        </div>
+        </ul>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var words = [
+                {% for palabra, frecuencia in datos %}
+                {text: "{{ palabra }}", size: {{ frecuencia }}},
+                {% endfor %}
+            ];
+
+            var width = 960,
+                height = 600;
+
+            var fill = d3.scaleOrdinal(d3.schemeCategory10); // Define a color scale
+
+            var layout = d3.layout.cloud()
+                .size([width, height])
+                .words(words.map(function(d) {
+                    // Scale the size to make it fit better
+                    return {text: d.text, size: 10 + d.size * 0.5}; // Adjust size calculation as needed
+                }))
+                .padding(5)
+                .rotate(0) // Set all text to horizontal; adjust as needed
+                .font("Impact")
+                .fontSize(function(d) { return d.size; })
+                .on("end", draw);
+
+            layout.start();
+
+            function draw(words) {
+                var svg = d3.select("#wordcloud").append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+                var word = svg.selectAll("text")
+                    .data(words)
+                    .enter().append("text")
+                    .style("font-family", "Impact")
+                    .style("fill", function(d, i) { return fill(i); })
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", function(d) { return d.size + "px"; })
+                    .attr("transform", function(d) {
+                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .text(function(d) { return d.text; });
+
+                animateWord(word); // Apply animation to all words
+            }
+
+            function animateWord(words) {
+                words.transition()
+                    .duration(2000)
+                    .attrTween("transform", function(d) {
+                        var a = Math.random() * 4 * Math.PI, // Random angle
+                            i = d3.interpolateNumber(0, 30); // Random distance
+                        return function(t) {
+                            var r = i(t),
+                                x = Math.sin(a) * r,
+                                y = Math.cos(a) * r;
+                            return `translate(${d.x + x}, ${d.y + y})rotate(${d.rotate})`;
+                        };
+                    })
+                    .on("end", function() { animateWord(d3.select(this)); }); // Loop the animation
+            }
+        });
+    </script>
 </body>
 </html>

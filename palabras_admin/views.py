@@ -23,14 +23,15 @@ def admin(request):
 
 def compartir(request):
     if request.method == 'POST':
-        # Asegurarse de que se está leyendo correctamente el cuerpo de la solicitud JSON
         datos_json = json.loads(request.body)
         datos = datos_json.get('frecuencias')
+        total_grupos = datos_json.get('totalGrupos')  # Get totalGrupos from the JSON body
 
         if datos is not None:
-            palabra_compartida = PalabraCompartida.objects.create(datos=datos)
-            share_link = request.build_absolute_uri(f'/ver_compartido/{palabra_compartida.id}/')
-            return JsonResponse({'success': True, 'shareLink': share_link})
+            # Save the word data along with totalGrupos
+            palabra_compartida = PalabraCompartida.objects.create(datos=datos, total_grupos=total_grupos)
+            share_link = request.build_absolute_uri(f'/palabras_admin/ver_compartido/{palabra_compartida.id}/')
+            return JsonResponse({'success': True, 'shareLink': share_link, 'totalGrupos': total_grupos})
         else:
             return JsonResponse({'success': False, 'error': 'No se proporcionaron datos.'}, status=400)
 
@@ -38,22 +39,19 @@ def compartir(request):
 
 def ver_compartido(request, uuid):
     palabra_compartida = get_object_or_404(PalabraCompartida, pk=uuid)
-    # Suponiendo que 'datos' es una lista de diccionarios con las claves 'text' y 'size'
     datos_brutos = palabra_compartida.datos
+    total_grupos = palabra_compartida.total_grupos  # Retrieve total groups
     
-    # Contabilizar las frecuencias de las palabras, sin importar mayúsculas o minúsculas
     contador_frecuencias = Counter()
     for item in datos_brutos:
-        palabra = item['text'].lower()  # Convertir a minúsculas para consolidar
-        frecuencia = item['size']
-        contador_frecuencias[palabra] += frecuencia
-    
-    # Convertir el contador a la lista de tuplas esperada por el template
-    datos = contador_frecuencias.most_common()  # Esto ordena por las más frecuentes
-    
-    # Pasar los datos procesados al contexto del template
-    return render(request, 'tu_template.html', {'datos': datos})
+        palabra = item.get('text', '').lower()
+        frecuencia = item.get('size', 0)
+        if palabra and frecuencia:  # This ensures only valid data is processed
+            contador_frecuencias[palabra] += frecuencia
 
+    datos = contador_frecuencias.most_common()
+    
+    return render(request, 'tu_template.html', {'datos': datos, 'totalGrupos': total_grupos})
 
 class Vista_Analisis(ListView):
     model = Extraccion4

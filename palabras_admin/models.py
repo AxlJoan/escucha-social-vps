@@ -114,6 +114,7 @@ class DatosCompartidos(models.Model):
 class PalabraCompartida(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     datos = models.JSONField()
+    total_grupos = models.IntegerField(default=0)  # Add this field if not present
 
     def __str__(self):
         return str(self.id)

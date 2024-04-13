@@ -17,9 +17,11 @@
     <!-- Navbar -->
     <nav class="bg-gray-800 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-lg font-semibold">Estadísticas y Nube de Palabras</a>
+            <a href="#" class="text-lg font-semibold">Whatsaap Analisis</a>
             <div>
                 <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="#" class="px-4 hover:text-gray-300">Busqueda</a>
+
                 <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
             </div>
         </div>
@@ -95,6 +97,7 @@
     </div>
     <script>
         let frecuenciasModificadas = [];
+        let totalGrupos; // Declare it at a scope accessible by your sharing button
 
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('filtroForm').addEventListener('submit', function(e) {
@@ -127,6 +130,8 @@
                             grupos.add(item.group_name); // Añade el nombre del grupo al conjunto
 
                         });
+                        totalGrupos = grupos.size; // Update the total groups count here
+
                         document.getElementById('contadorGrupos').textContent = `Total de Grupos: ${grupos.size}`;
 
                         const frecuencias = procesarTextoParaNube(todoTexto);
@@ -297,35 +302,36 @@
             }
             
             
-            
+
         });
             document.getElementById('compartirNube').addEventListener('click', function() {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Obtiene el token CSRF del meta tag
 
                 const url = 'http://127.0.0.1:8000/palabras_admin/api/compartir/'; // URL del endpoint para compartir
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken, // Usa 'X-CSRFToken' en lugar de 'csrfmiddlewaretoken' para el header
-
-                // Aquí podrías necesitar agregar un header de autorización si tu API lo requiere
-            },
-            body: JSON.stringify({
-                frecuencias: frecuenciasModificadas
-                totalGrupos: totalGrupos
-                // Aquí puedes agregar cualquier otro dato relevante que necesites compartir
-            })
+                fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+            frecuencias: frecuenciasModificadas,
+            totalGrupos: totalGrupos
         })
-        .then(response => response.json())
-        .then(data => {
-            // Aquí manejas la respuesta del servidor. Por ejemplo, mostrando el enlace generado al usuario.
-            if(data.success && data.shareLink) {
-                alert('Comparte este enlace: ' + data.shareLink);
-            }
-        })
-        .catch(error => console.error('Error al compartir:', error));
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.shareLink) {
+            alert('Comparte este enlace: ' + data.shareLink);
+        } else {
+            alert('Error compartiendo la nube de palabras.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al compartir:', error);
+        alert('Hubo un error al intentar compartir la nube de palabras.');
     });
+});
     
     </script>
 </body>

@@ -7,64 +7,78 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    {% if total_unique_groups %}
-<div>
-    Total de Grupos Únicos: {{ total_unique_groups }}
-</div>
-{% endif %}
-    <form method="get">
-        {{ filterset.form.as_p }}
-        <button type="submit">Filtrar</button>
-    </form>
+    <nav class="bg-gray-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-lg font-semibold">Whatsaap Analisis</a>
+            <div>
+                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="#" class="px-4 hover:text-gray-300">Busqueda</a>
+                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
+            </div>
+        </div>
+    </nav>
     
-    <table>
-        <thead>
+
+    <form method="get" class="my-5 mx-5">
+        {{ filterset.form.as_p }}
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Filtrar
+        </button>
+    </form>
+    {% if total_unique_groups %}
+    <div class="text-lg font-semibold my-3 mx-5">
+        Total de Grupos Únicos: {{ total_unique_groups }}
+    </div>
+    {% endif %}
+    <table class="min-w-full table-auto border-collapse bg-white shadow-md mx-5">
+        <thead class="bg-gray-200">
             <tr>
-                <th>Text Data</th>
-                <th>From Me</th>
-                <th>Number</th>
-                <th>Number 2</th>
-                <th>Group Name</th>
-                <th>Description</th>
-                <th>Cliente</th>
-                <th>Estado</th>
-                <th>Municipio</th>
-                <th>Número de Grupos</th>
+                <th class="px-4 py-2 border">Text Data</th>
+                <th class="px-4 py-2 border">From Me</th>
+                <th class="px-4 py-2 border">Number</th>
+                <th class="px-4 py-2 border">Number 2</th>
+                <th class="px-4 py-2 border">Group Name</th>
+                <th class="px-4 py-2 border">Description</th>
+                <th class="px-4 py-2 border">Cliente</th>
+                <th class="px-4 py-2 border">Estado</th>
+                <th class="px-4 py-2 border">Municipio</th>
             </tr>
         </thead>
         <tbody>
             {% for extraccion in extracciones %}
             <tr>
-                <td>{{ extraccion.text_data }}</td>
-                <td>{{ extraccion.from_me }}</td>
-                <td>{{ extraccion.number }}</td>
-                <td>{{ extraccion.number2 }}</td>
-                <td>{{ extraccion.group_name }}</td>
-                <td>{{ extraccion.description }}</td>
-                <td>{{ extraccion.cliente }}</td>
-                <td>{{ extraccion.estado }}</td>
-                <td>{{ extraccion.municipio }}</td>
-                <td>{{ extraccion.num_grupos }}</td>
+                <td class="border px-4 py-2">{{ extraccion.text_data }}</td>
+                <td class="border px-4 py-2">{{ extraccion.from_me }}</td>
+                <td class="border px-4 py-2">{{ extraccion.number }}</td>
+                <td class="border px-4 py-2">{{ extraccion.number2 }}</td>
+                <td class="border px-4 py-2">{{ extraccion.group_name }}</td>
+                <td class="border px-4 py-2">{{ extraccion.description }}</td>
+                <td class="border px-4 py-2">{{ extraccion.cliente }}</td>
+                <td class="border px-4 py-2">{{ extraccion.estado }}</td>
+                <td class="border px-4 py-2">{{ extraccion.municipio }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <div class="pagination">
-        <span class="step-links">
-            {% if extracciones.has_previous %}
-                <a href="?{{ request.GET.urlencode }}&page=1">&laquo; first</a>
-                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.previous_page_number }}">previous</a>
-            {% endif %}
-            
-            <span class="current">
-                Page {{ extracciones.number }} of {{ extracciones.paginator.num_pages }}.
+    <div class="flex justify-between items-center my-5 mx-5">
+        <div class="pagination">
+            <span class="step-links">
+                {% if extracciones.has_previous %}
+                <a href="?{{ request.GET.urlencode }}&page=1" class="text-blue-500 hover:text-blue-800">« first</a>
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.previous_page_number }}" class="text-blue-500 hover:text-blue-800">previous</a>
+                {% endif %}
+
+                <span class="current text-gray-700">
+                    Page {{ extracciones.number }} of {{ extracciones.paginator.num_pages }}.
+                </span>
+
+                {% if extracciones.has_next %}
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.next_page_number }}" class="text-blue-500 hover:text-blue-800">next</a>
+                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.paginator.num_pages }}" class="text-blue-500 hover:text-blue-800">last »</a>
+                {% endif %}
             </span>
-            
-            {% if extracciones.has_next %}
-                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.next_page_number }}">next</a>
-                <a href="?{{ request.GET.urlencode }}&page={{ extracciones.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </span>
+        </div>
     </div>
+
 </body>
 </html>
