@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Statistics</title>
+    <!-- Incluye Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Statistics</h1>
+    <div>
+        <canvas id="countryChart" width="400" height="400"></canvas>
+        <canvas id="stateChart" width="400" height="400"></canvas>
+    </div>
+    <script>
+        // Datos para el gráfico de países
+        var countryData = {
+            labels: {{ country_counts.keys|join:"','"|safe }},
+            datasets: [{
+                label: 'Country Count',
+                data: {{ country_counts.values|join:","|safe }},
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Datos para el gráfico de estados
+        var stateData = {
+            labels: {{ state_counts.keys|join:"','"|safe }},
+            datasets: [{
+                label: 'State Count',
+                data: {{ state_counts.values|join:","|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        var ctxCountry = document.getElementById('countryChart').getContext('2d');
+        var countryChart = new Chart(ctxCountry, {
+            type: 'bar',
+            data: countryData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var ctxState = document.getElementById('stateChart').getContext('2d');
+        var stateChart = new Chart(ctxState, {
+            type: 'bar',
+            data: stateData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

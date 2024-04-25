@@ -1,9 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from .models import Extraccion4,PalabraCompartida
+from .models import Extraccion4,PalabraCompartida,CountryCode,AreaCodeMX
 from .serializers import Extraccion4Serializer
 from .filters import Extraccion4Filter
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 import json  # Importar módulo json
@@ -11,6 +11,8 @@ from collections import Counter
 from django.views.generic import ListView
 from django.db.models import Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.views import View
 
 class Extraccion4List(generics.ListAPIView):
     queryset = Extraccion4.objects.all()
@@ -40,17 +42,18 @@ def compartir(request):
 def ver_compartido(request, uuid):
     palabra_compartida = get_object_or_404(PalabraCompartida, pk=uuid)
     datos_brutos = palabra_compartida.datos
+    
     total_grupos = palabra_compartida.total_grupos  # Retrieve total groups
     
     contador_frecuencias = Counter()
     for item in datos_brutos:
-        palabra = item.get('text', '').lower()
+        palabra = item.get('text', '')
         frecuencia = item.get('size', 0)
         if palabra and frecuencia:  # This ensures only valid data is processed
             contador_frecuencias[palabra] += frecuencia
 
     datos = contador_frecuencias.most_common()
-    
+    print(datos)
     return render(request, 'tu_template.html', {'datos': datos, 'totalGrupos': total_grupos})
 
 class Vista_Analisis(ListView):
@@ -91,3 +94,99 @@ class Vista_Analisis(ListView):
         context['total_unique_groups'] = total_unique_groups
         context['filterset'] = self.filterset
         return context
+    
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('nube_admin')  # Redirecciona a donde quieras después del login
+    return render(request, 'login.html')  # Asegúrate de tener esta plantilla
+
+
+class ClassifyNumberView(View):
+    def get(self, request, id):
+        try:
+            entry = Extraccion4.objects.get(id=id)
+            normalized_number = ''.join(filter(str.isdigit, entry.number))
+            print(f"Normalized number: {normalized_number}")  # Depuración
+
+            # Detectar código de país y determinar longitud del país
+            country_code = '+52' if normalized_number.startswith('52') else '+' + normalized_number[:2]
+            country = CountryCode.objects.filter(code=country_code).first()
+            print(f"Country code: {country_code}")  # Depuración
+
+            if country:
+                country_count = Extraccion4.objects.filter(number__startswith=country.code.replace('+', '')).count()
+                index = normalized_number.find(country.code.replace('+', '')) + len(country.code.replace('+', ''))
+                if normalized_number[index] == '1':
+                    index += 1  # Omitir el prefijo de troncal si existe
+
+                # Suponiendo códigos de área de 2 o 3 dígitos
+                for length in (2, 3):
+                    area_code = normalized_number[index:index + length]
+                    area = AreaCodeMX.objects.filter(code=area_code).first()
+                    if area:
+                        state_count = Extraccion4.objects.filter(number__startswith=country.code.replace('+', '') + area_code).count()
+                        print(f"Area code: {area_code}, State count: {state_count}")  # Depuración
+                        if state_count:
+                            break
+
+            response_data = {
+                'country_code': country_code,
+                'country': country.pais if country else 'Unknown',
+                'country_count': country_count,
+                'area_code': area_code if 'area_code' in locals() else 'Unknown',
+                'estado': area.estado if area else 'Unknown',
+                'state_count': state_count if 'state_count' in locals() else 0
+            }
+            return JsonResponse(response_data)
+        except Extraccion4.DoesNotExist:
+            return JsonResponse({'error': 'Entry not found'}, status=404)
+
+def statistics_view(request):
+    # Diccionarios para mantener los conteos por país y estado
+    country_counts = {}
+    state_counts = {}
+
+    # Procesar por cada país definido en CountryCode
+    for country in CountryCode.objects.all():
+        # Filtrar entradas por código de país
+        entries = Extraccion4.objects.filter(number__startswith=country.code.replace('+', ''))
+        country_count = entries.count()
+        country_counts[country.pais] = country_count
+
+        if country.code == '+52':  # Procesamiento especial para México
+            # Considerar el prefijo de troncal '1' si está presente
+            entries_with_trunk = entries.filter(number__startswith=country.code.replace('+', '') + '1')
+            entries_without_trunk = entries.exclude(number__startswith=country.code.replace('+', '') + '1')
+
+            # Procesar códigos de área con y sin el prefijo de troncal
+            for area in AreaCodeMX.objects.all():
+                # Contar estados con prefijo de troncal
+                state_count_with_trunk = entries_with_trunk.filter(
+                    number__startswith=country.code.replace('+', '') + '1' + area.code
+                ).count()
+
+                # Contar estados sin prefijo de troncal
+                state_count_without_trunk = entries_without_trunk.filter(
+                    number__startswith=country.code.replace('+', '') + area.code
+                ).count()
+
+                total_state_count = state_count_with_trunk + state_count_without_trunk
+                if area.estado not in state_counts:
+                    state_counts[area.estado] = total_state_count
+                else:
+                    state_counts[area.estado] += total_state_count
+
+    # Debugging outputs
+    print(country_counts)
+    print(state_counts)
+
+    return render(request, 'statistics.html', {
+        'country_counts': country_counts, 
+        'state_counts': state_counts
+    })

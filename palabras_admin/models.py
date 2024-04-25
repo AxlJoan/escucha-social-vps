@@ -72,7 +72,7 @@ class Extraccion4(models.Model):
     timestamp = models.DateTimeField(blank=True, null=True)
     received_timestamp = models.DateTimeField(blank=True, null=True)
     text_data = models.TextField(blank=True, null=True)
-    from_me = models.IntegerField(blank=True, null=True)
+    from_me = models.IntegerField(blank=True, null=True,db_index=True)
     number = models.CharField(max_length=255, blank=True, null=True, db_index=True)  # Individual field index
     number2 = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True)
@@ -118,3 +118,16 @@ class PalabraCompartida(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+class CountryCode(models.Model):
+    code = models.CharField(max_length=10, unique=True,db_index=True)
+    pais = models.CharField(max_length=50,null=True)
+
+    def __str__(self):
+        return self.code
+
+class AreaCodeMX(models.Model):
+    code = models.CharField(max_length=10, unique=True,db_index=True)
+    estado = models.CharField(max_length=50,null=True)
+    def __str__(self):
+        return self.code

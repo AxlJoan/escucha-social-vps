@@ -17,12 +17,12 @@
     <!-- Navbar -->
     <nav class="bg-gray-800 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-lg font-semibold">Whatsaap Analisis</a>
+            <a href="{% url 'nube_admin' %}" class="text-lg font-semibold">Whatsaap Analisis</a>
             <div>
-                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
-                <a href="#" class="px-4 hover:text-gray-300">Busqueda</a>
+                <a href="{% url 'nube_admin' %}" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="{% url 'extraccion4_list' %}" class="px-4 hover:text-gray-300">Busqueda</a>
 
-                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
+                <a href="" class="px-4 hover:text-gray-300">Cerrar sesión</a>
             </div>
         </div>
     </nav>
@@ -47,8 +47,11 @@
             </div>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Filtrar</button>
         </form>
-        <div id="contadorGrupos" class="mt-2 text-lg font-semibold"></div>
-
+        <div id="editarGrupos" class="mt-2 text-lg font-semibold">
+            Total de Grupos: <span id="contadorEditable">0</span>
+            <button id="editButton">Edit</button>
+        </div>
+        
         <!-- Flex Container for Word Frequencies and Word Cloud -->
         <div class="flex flex-wrap -mx-2">
 
@@ -97,7 +100,7 @@
     </div>
     <script>
         let frecuenciasModificadas = [];
-        let totalGrupos; // Declare it at a scope accessible by your sharing button
+        let totalGrupos = 0; // Declare it at a scope accessible by your sharing button
 
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('filtroForm').addEventListener('submit', function(e) {
@@ -132,14 +135,24 @@
                         });
                         totalGrupos = grupos.size; // Update the total groups count here
 
-                        document.getElementById('contadorGrupos').textContent = `Total de Grupos: ${grupos.size}`;
+                        document.getElementById('contadorEditable').textContent = totalGrupos;
 
                         const frecuencias = procesarTextoParaNube(todoTexto);
                         mostrarFrecuencias(frecuencias); // Muestra las frecuencias para edición
                     })
                     .catch(error => console.error('Error al cargar los datos:', error));
             });
+            document.getElementById('editButton').addEventListener('click', editarTotalGrupos);
 
+            function editarTotalGrupos() {
+                const nuevoTotal = prompt("Ingresa el nuevo total de grupos:", totalGrupos);
+                if (nuevoTotal !== null && !isNaN(nuevoTotal) && parseInt(nuevoTotal) >= 0) {
+                    totalGrupos = parseInt(nuevoTotal);
+                    document.getElementById('contadorEditable').textContent = totalGrupos;
+                }
+            }
+            
+            
             document.getElementById('generarNube').addEventListener('click', function() {
                 // Asegúrate de no declarar una nueva variable local aquí, usa la global.
                 frecuenciasModificadas = []; // Limpia la variable global para asegurar que estamos trabajando con los datos más recientes.
