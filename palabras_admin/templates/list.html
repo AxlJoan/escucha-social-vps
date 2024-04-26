@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Palabras Compartidas</title>
+</head>
+<body>
+    <h1>Palabras Compartidas</h1>
+    <ul>
+        {% for palabra in palabras %}
+        <li>{{ palabra.id }} - <a href="{% url 'palabra-edit' palabra.id %}">Editar</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

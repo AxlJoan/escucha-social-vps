@@ -9,11 +9,13 @@
 <body class="bg-gray-100">
     <nav class="bg-gray-800 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-lg font-semibold">Whatsaap Analisis</a>
+            <a href="{% url 'nube_admin' %}" class="text-lg font-semibold">Whatsaap Analisis</a>
             <div>
-                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
-                <a href="#" class="px-4 hover:text-gray-300">Busqueda</a>
-                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
+                <a href="{% url 'nube_admin' %}" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="{% url 'extraccion4_list' %}" class="px-4 hover:text-gray-300">Busqueda</a>
+                <a href="{% url 'estadisticas' %}" class="px-4 hover:text-gray-300">Estadisticas</a>
+
+                <a href="" class="px-4 hover:text-gray-300">Cerrar sesión</a>
             </div>
         </div>
     </nav>
@@ -34,11 +36,11 @@
         <thead class="bg-gray-200">
             <tr>
                 <th class="px-4 py-2 border">Text Data</th>
-                <th class="px-4 py-2 border">From Me</th>
-                <th class="px-4 py-2 border">Number</th>
+                <th class="px-4 py-2 border">Por mi</th>
+                <th class="px-4 py-2 border">Numero de Grupo</th>
                 <th class="px-4 py-2 border">Number 2</th>
-                <th class="px-4 py-2 border">Group Name</th>
-                <th class="px-4 py-2 border">Description</th>
+                <th class="px-4 py-2 border">Nombre del Grupo</th>
+                <th class="px-4 py-2 border">Descripcion</th>
                 <th class="px-4 py-2 border">Cliente</th>
                 <th class="px-4 py-2 border">Estado</th>
                 <th class="px-4 py-2 border">Municipio</th>

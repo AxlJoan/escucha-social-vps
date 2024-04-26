@@ -1,66 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Statistics</title>
-    <!-- Incluye Chart.js -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jasondavies/d3-cloud/build/d3.layout.cloud.js"></script>
+    
 </head>
 <body>
-    <h1>Statistics</h1>
-    <div>
-        <canvas id="countryChart" width="400" height="400"></canvas>
-        <canvas id="stateChart" width="400" height="400"></canvas>
-    </div>
-    <script>
-        // Datos para el gráfico de países
-        var countryData = {
-            labels: {{ country_counts.keys|join:"','"|safe }},
-            datasets: [{
-                label: 'Country Count',
-                data: {{ country_counts.values|join:","|safe }},
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        };
+    <nav class="bg-gray-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{% url 'nube_admin' %}" class="text-lg font-semibold">Whatsaap Analisis</a>
+            <div>
+                <a href="{% url 'nube_admin' %}" class="px-4 hover:text-gray-300">Inicio</a>
+                <a href="{% url 'extraccion4_list' %}" class="px-4 hover:text-gray-300">Busqueda</a>
+                <a href="{% url 'estadisticas' %}" class="px-4 hover:text-gray-300">Estadisticas</a>
 
-        // Datos para el gráfico de estados
-        var stateData = {
-            labels: {{ state_counts.keys|join:"','"|safe }},
-            datasets: [{
-                label: 'State Count',
-                data: {{ state_counts.values|join:","|safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        };
-
-        var ctxCountry = document.getElementById('countryChart').getContext('2d');
-        var countryChart = new Chart(ctxCountry, {
-            type: 'bar',
-            data: countryData,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        var ctxState = document.getElementById('stateChart').getContext('2d');
-        var stateChart = new Chart(ctxState, {
-            type: 'bar',
-            data: stateData,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+                <a href="" class="px-4 hover:text-gray-300">Cerrar sesión</a>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <h2>Estadisticas por pais</h2>
+    <table>
+        <tr>
+            <th>Pais</th>
+            <th>Cantidad</th>
+        </tr>
+        {% for country, count in country_counts.items %}
+        <tr>
+            <td>{{ country }}</td>
+            <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <h2>Estadisticas por estados de Mexico</h2>
+    <table>
+        <tr>
+            <th>Estado</th>
+            <th>Cantidad</th>
+        </tr>
+        {% for state, count in state_counts.items %}
+        <tr>
+            <td>{{ state }}</td>
+            <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

@@ -2,24 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shared Words View</title>
+    <title>Nube de Palabras</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-cloud/build/d3.layout.cloud.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <nav class="bg-gray-800 text-white p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-lg font-semibold">Estadísticas y Nube de Palabras</a>
-            <div>
-                <a href="#" class="px-4 hover:text-gray-300">Inicio</a>
-                <a href="#" class="px-4 hover:text-gray-300">Cerrar sesión</a>
-            </div>
-        </div>
-    </nav>
     <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold text-center text-gray-800">Word Frequencies</h1>
-        <p class="text-xl text-center my-4 text-gray-600">Total Groups: {{ totalGrupos }}</p>
+        <h1 class="text-3xl font-bold text-center text-gray-800">Frecuencia de Palabras</h1>
+        <p class="text-xl text-center my-4 text-gray-600">Total de Grupos: {{ totalGrupos }}</p>
         <div id="wordcloud" class="w-full h-auto bg-white rounded-lg shadow-lg my-4"></div>
         <ul class="list-disc space-y-2 p-5 bg-white rounded-lg shadow">
             {% for palabra, frecuencia in datos %}
@@ -35,47 +26,54 @@
                 {text: "{{ palabra }}", size: {{ frecuencia }}},
                 {% endfor %}
             ];
+            console.log(words);
 
-            var width = 960,
-                height = 600;
+var width = 960,
+    height = 600;
 
-            var fill = d3.scaleOrdinal(d3.schemeCategory10); // Define a color scale
+var fill = d3.scaleOrdinal(d3.schemeCategory10); // Define a color scale
 
-            var layout = d3.layout.cloud()
-                .size([width, height])
-                .words(words.map(function(d) {
-                    // Scale the size to make it fit better
-                    return {text: d.text, size: 10 + d.size * 0.5}; // Adjust size calculation as needed
-                }))
-                .padding(5)
-                .rotate(0) // Set all text to horizontal; adjust as needed
-                .font("Impact")
-                .fontSize(function(d) { return d.size; })
-                .on("end", draw);
+// Utiliza d3.scaleSqrt para una escala de raíz cuadrada, mejor para una amplia gama de valores
+var sizeScale = d3.scaleSqrt()
+    .domain([0, d3.max(words, function(d) { return d.size; })]) // Asegúrate de que el dominio cubra desde 0 hasta el tamaño máximo
+    .range([10, 100]); // El rango de tamaños de fuente desde el mínimo al máximo
 
-            layout.start();
+var layout = d3.layout.cloud()
+    .size([width, height])
+    .words(words.map(function(d) {
+        // Aplica la escala de tamaño a las palabras
+        return {text: d.text, size: d.size > 100 ? sizeScale(d.size) : 10}; // Las palabras con frecuencia > 100 usan la escala, las demás tienen tamaño 10
+    }))
+    .padding(5)
+    .rotate(0) // Set all text to horizontal; adjust as needed
+    .font("Impact")
+    .fontSize(function(d) { return d.size; }) // La escala ya se aplicó arriba
+    .on("end", draw);
 
-            function draw(words) {
-                var svg = d3.select("#wordcloud").append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .append("g")
-                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+layout.start();
 
-                var word = svg.selectAll("text")
-                    .data(words)
-                    .enter().append("text")
-                    .style("font-family", "Impact")
-                    .style("fill", function(d, i) { return fill(i); })
-                    .attr("text-anchor", "middle")
-                    .attr("font-size", function(d) { return d.size + "px"; })
-                    .attr("transform", function(d) {
-                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                    })
-                    .text(function(d) { return d.text; });
+function draw(words) {
+    var svg = d3.select("#wordcloud").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-                animateWord(word); // Apply animation to all words
-            }
+    var word = svg.selectAll("text")
+        .data(words)
+        .enter().append("text")
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("font-size", function(d) { return d.size + "px"; })
+        .attr("transform", function(d) {
+            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+
+    // La función animateWord se mantiene igual
+    animateWord(word); 
+}
 
             function animateWord(words) {
                 words.transition()

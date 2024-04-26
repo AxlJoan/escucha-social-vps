@@ -114,10 +114,11 @@ class DatosCompartidos(models.Model):
 class PalabraCompartida(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     datos = models.JSONField()
-    total_grupos = models.IntegerField(default=0)  # Add this field if not present
+    total_grupos = models.IntegerField()
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return str(self.id)
+        return self.name
 
 class CountryCode(models.Model):
     code = models.CharField(max_length=10, unique=True,db_index=True)

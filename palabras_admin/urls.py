@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path,include
 from rest_framework import routers
 from palabras_admin import views
-from .views import Extraccion4List,Vista_Analisis,ClassifyNumberView
+from .views import Extraccion4List,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView
 
 urlpatterns = [
     path('login/', views.login, name='login'),  # Correcto
@@ -28,5 +28,8 @@ urlpatterns = [
     path('analisis/', Vista_Analisis.as_view(), name='extraccion4_list'),
     path('classify/<int:id>/', ClassifyNumberView.as_view(), name='classify-number'),
     path('estadisticas/',views.statistics_view,name='estadisticas'),
+    path('palabras/', PalabraCompartidaListView.as_view(), name='palabra-list'),
+    path('palabras/<uuid:pk>/editar/', PalabraCompartidaUpdateView.as_view(), name='palabra-edit'),
+    path('api/obtener_enlaces/', views.obtener_enlaces, name='obtener_enlaces'),
 
 ]

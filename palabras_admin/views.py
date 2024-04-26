@@ -13,6 +13,9 @@ from django.db.models import Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.views import View
+from django.views.generic import ListView, UpdateView
+from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
 
 class Extraccion4List(generics.ListAPIView):
     queryset = Extraccion4.objects.all()
@@ -23,21 +26,45 @@ class Extraccion4List(generics.ListAPIView):
 def admin(request):
     return render(request,'admin.html')
 
+@csrf_exempt  # Asegúrate de manejar CSRF apropiadamente en producción
 def compartir(request):
     if request.method == 'POST':
-        datos_json = json.loads(request.body)
-        datos = datos_json.get('frecuencias')
-        total_grupos = datos_json.get('totalGrupos')  # Get totalGrupos from the JSON body
+        try:
+            datos_json = json.loads(request.body)
+            datos = datos_json.get('frecuencias')
+            total_grupos = datos_json.get('totalGrupos')
+            nombre = datos_json.get('nombre')
+            id_palabra_compartida = datos_json.get('id', None)
 
-        if datos is not None:
-            # Save the word data along with totalGrupos
-            palabra_compartida = PalabraCompartida.objects.create(datos=datos, total_grupos=total_grupos)
-            share_link = request.build_absolute_uri(f'/palabras_admin/ver_compartido/{palabra_compartida.id}/')
-            return JsonResponse({'success': True, 'shareLink': share_link, 'totalGrupos': total_grupos})
-        else:
-            return JsonResponse({'success': False, 'error': 'No se proporcionaron datos.'}, status=400)
+            if datos:
+                if id_palabra_compartida:
+                    # Actualizar un enlace existente
+                    palabra_compartida = PalabraCompartida.objects.get(id=id_palabra_compartida)
+                else:
+                    # Crear un nuevo enlace
+                    palabra_compartida = PalabraCompartida()
+
+                palabra_compartida.datos = datos
+                palabra_compartida.total_grupos = total_grupos
+                palabra_compartida.name = nombre
+                palabra_compartida.save()
+                
+                share_link = request.build_absolute_uri(f'/palabras_admin/ver_compartido/{palabra_compartida.id}/')
+                return JsonResponse({'success': True, 'shareLink': share_link})
+            else:
+                return JsonResponse({'success': False, 'error': 'No se proporcionaron datos suficientes.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+def obtener_enlaces(request):
+    if request.method == 'GET':
+        enlaces = PalabraCompartida.objects.all()
+        datos = [{'id': str(enlace.id), 'nombre': enlace.name} for enlace in enlaces]  # Convert UUID to string
+        return JsonResponse(datos, safe=False)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ver_compartido(request, uuid):
     palabra_compartida = get_object_or_404(PalabraCompartida, pk=uuid)
@@ -47,13 +74,12 @@ def ver_compartido(request, uuid):
     
     contador_frecuencias = Counter()
     for item in datos_brutos:
-        palabra = item.get('text', '')
+        palabra = item.get('text', '').lower()
         frecuencia = item.get('size', 0)
         if palabra and frecuencia:  # This ensures only valid data is processed
             contador_frecuencias[palabra] += frecuencia
 
     datos = contador_frecuencias.most_common()
-    print(datos)
     return render(request, 'tu_template.html', {'datos': datos, 'totalGrupos': total_grupos})
 
 class Vista_Analisis(ListView):
@@ -190,3 +216,14 @@ def statistics_view(request):
         'country_counts': country_counts, 
         'state_counts': state_counts
     })
+
+class PalabraCompartidaListView(ListView):
+    model = PalabraCompartida
+    context_object_name = 'palabras'
+    template_name = 'list.html'
+
+class PalabraCompartidaUpdateView(UpdateView):
+    model = PalabraCompartida
+    fields = ['datos', 'total_grupos']
+    template_name = 'edit.html'
+    success_url = reverse_lazy('palabra-list')

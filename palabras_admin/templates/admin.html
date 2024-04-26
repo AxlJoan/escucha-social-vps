@@ -21,6 +21,7 @@
             <div>
                 <a href="{% url 'nube_admin' %}" class="px-4 hover:text-gray-300">Inicio</a>
                 <a href="{% url 'extraccion4_list' %}" class="px-4 hover:text-gray-300">Busqueda</a>
+                <a href="{% url 'estadisticas' %}" class="px-4 hover:text-gray-300">Estadisticas</a>
 
                 <a href="" class="px-4 hover:text-gray-300">Cerrar sesión</a>
             </div>
@@ -73,8 +74,22 @@
                 <div id="nubePalabras" class="w-full h-400px border-2 border-gray-300"></div>
             </div>
         </div>
-        <button id="compartirNube" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">Compartir Nube de Palabras</button>
+        <form id="compartirForm" class="mb-8">
+            <!-- Campo para el nombre -->
+            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        
+            <!-- Campo de selección para los enlaces existentes o nueva creación -->
+            <label for="enlaceExistente" class="block text-sm font-medium text-gray-700">Enlace:</label>
+            <select id="enlaceExistente" name="enlaceExistente" class="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="new">Crear nuevo enlace</option>
+                <!-- Opciones se llenarán dinámicamente -->
+            </select>
 
+        
+            <!-- Botón para compartir la nube de palabras -->
+            <button id="compartirNube" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">Compartir Nube de Palabras</button>
+        </form>
         <!-- Detailed Data -->
         <div class="mt-8">
             <h2 class="text-xl font-bold my-4">Datos Detallados</h2>
@@ -103,6 +118,23 @@
         let totalGrupos = 0; // Declare it at a scope accessible by your sharing button
 
         document.addEventListener("DOMContentLoaded", function() {
+            cargarEnlacesExistente();
+            function cargarEnlacesExistente() {
+    const url = 'http://127.0.0.1:8000/palabras_admin/api/obtener_enlaces/';
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('enlaceExistente');
+            select.innerHTML = ''; // Limpia las opciones anteriores
+            select.appendChild(new Option("Crear nuevo enlace", "new")); // Asegúrate de que esta opción esté siempre disponible
+            data.forEach(enlace => {
+                const option = new Option(enlace.nombre, enlace.id);
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar los enlaces:', error));
+}
+
             document.getElementById('filtroForm').addEventListener('submit', function(e) {
                 e.preventDefault(); // Evita que el formulario se envíe de manera tradicional.
                 frecuenciasModificadas = [];
@@ -172,61 +204,50 @@
             });
 
             function mostrarFrecuencias(frecuencias) {
-                const contenedor = document.getElementById('frecuenciasPalabras');
-                const buscador = document.getElementById('buscadorPalabras');
+    const contenedor = document.getElementById('frecuenciasPalabras');
+    const buscador = document.getElementById('buscadorPalabras');
+    
+    if (frecuenciasModificadas.length === 0) {
+        frecuenciasModificadas = frecuencias.map((f, index) => ({ ...f, id: index }));
+    }
+    
+    const filtrarYMostrar = () => {
+        const textoBusqueda = buscador.value.toLowerCase();
+        contenedor.innerHTML = '';
         
-                // Actualiza frecuenciasModificadas si es la primera vez
-                if (frecuenciasModificadas.length === 0) {
-                    frecuenciasModificadas = frecuencias.slice();
-                }
-        
-                const filtrarYMostrar = () => {
-                    const textoBusqueda = buscador.value.toLowerCase();
-                    contenedor.innerHTML = ''; // Limpia el contenedor para la nueva lista filtrada
-                    
-                    frecuenciasModificadas
-                        .filter(frecuencia => frecuencia.text.toLowerCase().includes(textoBusqueda))
-                        .forEach(frecuencia => {
-                            const div = document.createElement('div');
-                            const inputTexto = document.createElement('input');
-                            inputTexto.type = 'text';
-                            inputTexto.value = frecuencia.text;
-                            inputTexto.onchange = (e) => {
-                                // Encuentra y actualiza la frecuencia en frecuenciasModificadas
-                                const item = frecuenciasModificadas.find(f => f.text === e.target.value);
-                                if (item) {
-                                    item.text = e.target.value;
-                                }
-                            };
-        
-                            const inputFrecuencia = document.createElement('input');
-                            inputFrecuencia.type = 'number';
-                            inputFrecuencia.value = frecuencia.size;
-                            inputFrecuencia.onchange = (e) => {
-                                // Encuentra y actualiza la frecuencia en frecuenciasModificadas
-                                const item = frecuenciasModificadas.find(f => f.text === inputTexto.value);
-                                if (item) {
-                                    item.size = parseInt(e.target.value, 10);
-                                }
-                            };
-        
-                            div.appendChild(inputTexto);
-                            div.appendChild(inputFrecuencia);
-                            contenedor.appendChild(div);
-                        });
+        frecuenciasModificadas
+            .filter(frecuencia => frecuencia.text.toLowerCase().includes(textoBusqueda))
+            .forEach(frecuencia => {
+                const div = document.createElement('div');
+                const inputTexto = document.createElement('input');
+                inputTexto.type = 'text';
+                inputTexto.value = frecuencia.text;
+                inputTexto.onchange = (e) => {
+                    frecuencia.text = e.target.value;
                 };
-        
-                // Asegúrate de llamar a filtrarYMostrar para mostrar todos los datos inicialmente
-                filtrarYMostrar();
-        
-                // Actualiza la lista según la búsqueda del usuario
-                buscador.addEventListener('input', filtrarYMostrar);
-            }
+                
+                const inputFrecuencia = document.createElement('input');
+                inputFrecuencia.type = 'number';
+                inputFrecuencia.value = frecuencia.size;
+                inputFrecuencia.onchange = (e) => {
+                    frecuencia.size = parseInt(e.target.value, 10);
+                };
+                
+                div.appendChild(inputTexto);
+                div.appendChild(inputFrecuencia);
+                contenedor.appendChild(div);
+            });
+    };
+    
+    filtrarYMostrar();
+    buscador.addEventListener('input', filtrarYMostrar);
+}
+
             
 
             function procesarTextoParaNube(texto) {
                 const stopWords = ["en", "con", "tal", "y", "o", "para", "como", "los", "las", "un", "una", "de", "que", "el", "la", "por", "mi", "mis", "tu", "tus", "su", "sus", "al", "del"];
-                const palabrasExcluidas = new Set(["negro", "est", "uas", "caf", "porno", "xxx", ".", "ab", "esta", "oz", "ttp", "tro", "ls", "sr", "si", "pcs", "ah", "aun", "tb", "efe", "gel", "xx", "z", "sms", "voc", "seu", "rib", "espa", "sexy", "viu", "smart", "only", "etc", "sexo", "voce", "es", "per", "tim", ...stopWords]);
+                const palabrasExcluidas = new Set(["negro", "est", "uas", "caf", "porno", "xxx", ".", "ab", "esta", "oz", "ttp", "tro", "ls", "sr", "si", "pcs", "ah", "aun", "tb", "efe", "gel", "xx", "z", "sms", "voc", "seu", "rib", "espa", "sexy", "viu", "smart", "only", "etc", "sexo", "voce", "es", "per", "tim",'madura','jovencita','httpsonlyfanscomyamyamilet','httpsinstagramcomhldaniiutmmediumcopylink','httpstwittercomyamidiis11tGy5TvF7g6GjR2IQN82IJg','httpstmepamelayamilet','httpswwwfacebookcomdanihl790mibextidLQQJ4d','teen','SERV','httpsyoutubedlvopr3DQsiTwjJnS7gNVMiUrId','YAMILETNUEVO','perverso','httpsxcomColuchiSex21939t6Lcs0MMjhQ3WvAzGFbgs08','httpstwittercomSamanta464551t1uPfyRbrXMwkMsFeL9bp8Qs09','conocerte','adherirme','incomprensiones','poliomielitis','squirt','gnero','estoy','vergas','Chicxs','SEXYS','sexual','SEX','SEXIE','sexie','SEXTIEMBRE','httpswwwafiliadoparceiraocombrsexyshop','Hipersexualidad','SEXI','Cisexismo','Sexual','videollamadassexting','Sex', ...stopWords]);
                 
                 const palabras = texto.split(/\s+/);
                 const frecuencias = {};
@@ -317,34 +338,43 @@
             
 
         });
-            document.getElementById('compartirNube').addEventListener('click', function() {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Obtiene el token CSRF del meta tag
+        document.getElementById('compartirNube').addEventListener('click', function(event) {
+    event.preventDefault(); // Esto previene que el formulario haga una solicitud GET
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const nombre = document.getElementById('nombre').value;
+    const enlaceSeleccionado = document.getElementById('enlaceExistente').value;
 
-                const url = 'http://127.0.0.1:8000/palabras_admin/api/compartir/'; // URL del endpoint para compartir
-                fetch(url, {
+    const url = 'http://127.0.0.1:8000/palabras_admin/api/compartir/';
+    const payload = {
+        frecuencias: frecuenciasModificadas,
+        totalGrupos: totalGrupos,
+        nombre: nombre
+    };
+
+    if (enlaceSeleccionado !== "new") {
+        payload.id = enlaceSeleccionado;
+    }
+
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken,
         },
-        body: JSON.stringify({
-            frecuencias: frecuenciasModificadas,
-            totalGrupos: totalGrupos
-        })
+        body: JSON.stringify(payload)
     })
     .then(response => response.json())
     .then(data => {
         if (data.success && data.shareLink) {
             alert('Comparte este enlace: ' + data.shareLink);
+            cargarEnlacesExistente();  // Actualiza la lista de enlaces
         } else {
-            alert('Error compartiendo la nube de palabras.');
+            alert('Error compartiendo la nube de palabras: ' + data.error);
         }
     })
-    .catch(error => {
-        console.error('Error al compartir:', error);
-        alert('Hubo un error al intentar compartir la nube de palabras.');
-    });
 });
+
+
     
     </script>
 </body>
