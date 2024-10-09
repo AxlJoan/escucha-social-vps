@@ -1,4 +1,4 @@
-#!/home/palabras/nube_palabras/env/bin/python3
+#!/var/www/django-palab/env/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -72,7 +72,7 @@ class Extraccion4(models.Model):
     timestamp = models.DateTimeField(blank=True, null=True)
     received_timestamp = models.DateTimeField(blank=True, null=True)
     text_data = models.TextField(blank=True, null=True)
-    from_me = models.IntegerField(blank=True, null=True,db_index=True)
+    from_me = models.IntegerField(blank=True, null=True, db_index=True)
     number = models.CharField(max_length=255, blank=True, null=True, db_index=True)  # Individual field index
     number2 = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True)

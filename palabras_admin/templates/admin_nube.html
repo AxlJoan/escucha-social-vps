@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Nube de Palabras</title>
+</head>
+<body>
+
+<h1>Nube de Palabras para {{ nombre_cliente }}</h1>
+<img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
+
+<h2>Datos de Extracción</h2>
+<p>Total de Grupos Únicos: {{ total_unique_groups }}</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Municipio</th>
+            <th>Grupo</th>
+            <th>Texto</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for extraccion in extracciones %}
+        <tr>
+            <td>{{ extraccion.cliente }}</td>
+            <td>{{ extraccion.estado }}</td>
+            <td>{{ extraccion.municipio }}</td>
+            <td>{{ extraccion.group_name }}</td>
+            <td>{{ extraccion.text_data }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Paginación -->
+<div>
+    {% if extracciones.has_previous %}
+        <a href="?page={{ extracciones.previous_page_number }}">Anterior</a>
+    {% endif %}
+    <span>Página {{ extracciones.number }} de {{ extracciones.paginator.num_pages }}</span>
+    {% if extracciones.has_next %}
+        <a href="?page={{ extracciones.next_page_number }}">Siguiente</a>
+    {% endif %}
+</div>
+
+</body>
+</html>

@@ -199,3 +199,26 @@ class Extraccion4(models.Model):
     class Meta:
         managed = False
         db_table = 'extraccion4'
+    
+
+class Extraccion5(models.Model):
+    chat_row_id = models.IntegerField(blank=True, null=True)
+    timestamp = models.DateTimeField(blank=True, null=True)
+    received_timestamp = models.DateTimeField(blank=True, null=True)
+    text_data = models.TextField(blank=True, null=True)
+    from_me = models.IntegerField(blank=True, null=True)
+    number = models.CharField(max_length=255, blank=True, null=True)
+    number2 = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=255, blank=True, null=True)
+    verified_name = models.CharField(max_length=255, blank=True, null=True)
+    server = models.CharField(max_length=255, blank=True, null=True)
+    device = models.CharField(max_length=255, blank=True, null=True)
+    group_name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    cliente = models.CharField(max_length=255, blank=True, null=True)
+    estado = models.CharField(max_length=255, blank=True, null=True)
+    municipio = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'extraccion5'

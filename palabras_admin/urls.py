@@ -17,11 +17,12 @@ Including another URLconf
 from django.urls import path,include
 from rest_framework import routers
 from palabras_admin import views
-from .views import Extraccion4List,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView
+from palabras_admin.views import nube_palabras_view
+from .views import extraccion4_list,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView, tabla_datos_view
 
 urlpatterns = [
     path('login/', views.login, name='login'),  # Correcto
-    path('api/extraccion4/', Extraccion4List.as_view(), name='extraccion4-list'),
+    path('api/extraccion4/', extraccion4_list),
     path('nube_admin/',views.admin,name='nube_admin'),
     path('api/compartir/', views.compartir, name='compartir'),
     path('ver_compartido/<uuid:uuid>/', views.ver_compartido, name='ver_compartido'),
@@ -31,5 +32,8 @@ urlpatterns = [
     path('palabras/', PalabraCompartidaListView.as_view(), name='palabra-list'),
     path('palabras/<uuid:pk>/editar/', PalabraCompartidaUpdateView.as_view(), name='palabra-edit'),
     path('api/obtener_enlaces/', views.obtener_enlaces, name='obtener_enlaces'),
+    path('nube/', views.generar_nube_palabras, name='nube_palabras'),
+    path('nube_palabras/', nube_palabras_view, name='nube_palabras'),
+    path('tabla_datos/', tabla_datos_view, name='tabla_datos'),
 
 ]

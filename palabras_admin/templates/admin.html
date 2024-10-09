@@ -12,6 +12,12 @@
     <script src="https://cdn.jsdelivr.net/gh/jasondavies/d3-cloud/build/d3.layout.cloud.js"></script>
 
 </head>
+<style>
+#tablaDatos {
+    display: none;
+}
+
+</style>
 <body class="bg-gray-200">
 
     <!-- Navbar -->
@@ -92,25 +98,26 @@
         </form>
         <!-- Detailed Data -->
         <div class="mt-8">
-            <h2 class="text-xl font-bold my-4">Datos Detallados</h2>
             
-            <div class="relative overflow-y-auto max-h-[500px] shadow rounded-lg">
-                <table id="tablaDatos" class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50 sticky top-0 z-10">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Municipio</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Texto</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
+            <div class="relative overflow-y-auto max-h-[500px] overflow-x-auto shadow rounded-lg">
+    <div class="relative overflow-y-auto max-h-[400px] overflow-x-auto shadow rounded-lg">
+    <table id="tablaDatos" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Municipio</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Texto</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grupo</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            <!-- Data rows will be inserted here -->
+        </tbody>
+    </table>
+</div>
 
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Data rows will be inserted here -->
-                    </tbody>
-                </table>
-            </div>
+            
         </div>
     </div>
     <script>
@@ -120,7 +127,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             cargarEnlacesExistente();
             function cargarEnlacesExistente() {
-    const url = 'http://127.0.0.1:8000/palabras_admin/api/obtener_enlaces/';
+    const url = 'https://nube-palabras.zapto.org/palabras_admin/api/obtener_enlaces/';
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -141,7 +148,7 @@
                 const cliente = document.getElementById('cliente').value;
                 const estado = document.getElementById('estado').value;
                 const municipio = document.getElementById('municipio').value;
-                let url = 'http://127.0.0.1:8000/palabras_admin/api/extraccion4/';
+                let url = 'https://nube-palabras.zapto.org/palabras_admin/api/extraccion4/';
                 let params = new URLSearchParams({cliente, estado, municipio}).toString();
                 url += '?' + params;
                 
@@ -344,7 +351,7 @@
     const nombre = document.getElementById('nombre').value;
     const enlaceSeleccionado = document.getElementById('enlaceExistente').value;
 
-    const url = 'http://127.0.0.1:8000/palabras_admin/api/compartir/';
+    const url = 'https://nube-palabras.zapto.org/palabras_admin/api/compartir/';
     const payload = {
         frecuencias: frecuenciasModificadas,
         totalGrupos: totalGrupos,

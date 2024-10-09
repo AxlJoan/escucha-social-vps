@@ -25,9 +25,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 20485760  # 10 MB
 SECRET_KEY = 'django-insecure-iy$plyxm-d*zu$y0k1toqyc&+-&n*3l=bp5@=obrk2k*fst!fp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1","nube-palabras.zapto.org","escuchasocial.zapto.org","216.225.196.110","187.190.174.234"]
 
 
 # Application definition
@@ -91,6 +91,15 @@ DATABASES = {
         }
     }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -126,8 +135,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

@@ -16,15 +16,43 @@ from django.views import View
 from django.views.generic import ListView, UpdateView
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import sync_to_async
+from django.db.models import Q
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
-class Extraccion4List(generics.ListAPIView):
-    queryset = Extraccion4.objects.all()
-    serializer_class = Extraccion4Serializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = Extraccion4Filter
+@sync_to_async
+def filter_extraccion4(cliente=None, estado=None, municipio=None):
+    cache_key = f"extraccion4-{cliente}-{estado}-{municipio}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
+    q_objects = Q()
+    if cliente:
+        q_objects &= Q(cliente__icontains=cliente)
+    if estado:
+        q_objects &= Q(estado__icontains=estado)
+    if municipio:
+        q_objects &= Q(municipio__icontains=municipio)
+
+    data = list(Extraccion4.objects.filter(q_objects).values('text_data', 'cliente', 'estado', 'municipio', 'group_name'))
+    cache.set(cache_key, data, timeout=60*15)  # Cache for 15 minutes
+    return data
+
+# Aplicando el cache_page directamente a la función vista
+@cache_page(60 * 15)
+async def extraccion4_list(request):
+    cliente = request.GET.get('cliente', '')
+    estado = request.GET.get('estado', '')
+    municipio = request.GET.get('municipio', '')
+
+    data = await filter_extraccion4(cliente, estado, municipio)
+    return JsonResponse(data, safe=False)
 
 def admin(request):
-    return render(request,'admin.html')
+    return render(request,'tu_template.html')
 
 @csrf_exempt  # Asegúrate de manejar CSRF apropiadamente en producción
 def compartir(request):
@@ -75,16 +103,23 @@ def ver_compartido(request, uuid):
     contador_frecuencias = Counter()
     for item in datos_brutos:
         palabra = item.get('text', '').lower()
-        frecuencia = item.get('size', 0)
+        try:
+            frecuencia = int(item.get('size', 0))
+        except (ValueError, TypeError) as e:
+            # Log the problematic value for debugging
+            print(f"Skipping invalid size value: {item.get('size')} - Error: {e}")
+            frecuencia = 0  # Default to 0 if conversion fails
+
         if palabra and frecuencia:  # This ensures only valid data is processed
             contador_frecuencias[palabra] += frecuencia
 
     datos = contador_frecuencias.most_common()
     return render(request, 'tu_template.html', {'datos': datos, 'totalGrupos': total_grupos})
 
+# Antes era template_name = 'analisis.html'
 class Vista_Analisis(ListView):
     model = Extraccion4
-    template_name = 'analisis.html'
+    template_name = 'tu_template.html'
     context_object_name = 'extracciones'
     paginate_by = 100  # Ajusta este número según lo que sea manejable para tu página
 
@@ -152,14 +187,16 @@ class ClassifyNumberView(View):
                     index += 1  # Omitir el prefijo de troncal si existe
 
                 # Suponiendo códigos de área de 2 o 3 dígitos
+                area_codes = AreaCodeMX.objects.all().values_list('code', flat=True)
                 for length in (2, 3):
                     area_code = normalized_number[index:index + length]
-                    area = AreaCodeMX.objects.filter(code=area_code).first()
-                    if area:
-                        state_count = Extraccion4.objects.filter(number__startswith=country.code.replace('+', '') + area_code).count()
+                    if area_code in area_codes:
+                        area = AreaCodeMX.objects.get(code=area_code)
+                        state_count = Extraccion4.objects.filter(
+                            number__startswith=country.code.replace('+', '') + area_code
+                        ).count()
                         print(f"Area code: {area_code}, State count: {state_count}")  # Depuración
-                        if state_count:
-                            break
+                        break
 
             response_data = {
                 'country_code': country_code,
@@ -172,41 +209,40 @@ class ClassifyNumberView(View):
             return JsonResponse(response_data)
         except Extraccion4.DoesNotExist:
             return JsonResponse({'error': 'Entry not found'}, status=404)
-
+        
 def statistics_view(request):
     # Diccionarios para mantener los conteos por país y estado
     country_counts = {}
     state_counts = {}
 
     # Procesar por cada país definido en CountryCode
-    for country in CountryCode.objects.all():
+    countries = CountryCode.objects.all()
+    entries = Extraccion4.objects.all()
+
+    for country in countries:
         # Filtrar entradas por código de país
-        entries = Extraccion4.objects.filter(number__startswith=country.code.replace('+', ''))
-        country_count = entries.count()
+        country_code = country.code.replace('+', '')
+        country_entries = entries.filter(number__startswith=country_code)
+        country_count = country_entries.count()
         country_counts[country.pais] = country_count
 
         if country.code == '+52':  # Procesamiento especial para México
             # Considerar el prefijo de troncal '1' si está presente
-            entries_with_trunk = entries.filter(number__startswith=country.code.replace('+', '') + '1')
-            entries_without_trunk = entries.exclude(number__startswith=country.code.replace('+', '') + '1')
+            entries_with_trunk = country_entries.filter(number__startswith=country_code + '1')
+            entries_without_trunk = country_entries.exclude(number__startswith=country_code + '1')
 
             # Procesar códigos de área con y sin el prefijo de troncal
             for area in AreaCodeMX.objects.all():
-                # Contar estados con prefijo de troncal
                 state_count_with_trunk = entries_with_trunk.filter(
-                    number__startswith=country.code.replace('+', '') + '1' + area.code
+                    number__startswith=country_code + '1' + area.code
                 ).count()
 
-                # Contar estados sin prefijo de troncal
                 state_count_without_trunk = entries_without_trunk.filter(
-                    number__startswith=country.code.replace('+', '') + area.code
+                    number__startswith=country_code + area.code
                 ).count()
 
                 total_state_count = state_count_with_trunk + state_count_without_trunk
-                if area.estado not in state_counts:
-                    state_counts[area.estado] = total_state_count
-                else:
-                    state_counts[area.estado] += total_state_count
+                state_counts[area.estado] = state_counts.get(area.estado, 0) + total_state_count
 
     # Debugging outputs
     print(country_counts)
@@ -216,6 +252,7 @@ def statistics_view(request):
         'country_counts': country_counts, 
         'state_counts': state_counts
     })
+
 
 class PalabraCompartidaListView(ListView):
     model = PalabraCompartida
@@ -227,3 +264,281 @@ class PalabraCompartidaUpdateView(UpdateView):
     fields = ['datos', 'total_grupos']
     template_name = 'edit.html'
     success_url = reverse_lazy('palabra-list')
+
+# ----------------------------- A partir de aquí inicia mi código ------------------------
+
+# Conectar a la base de datos
+import mysql.connector
+import pandas as pd
+from django.shortcuts import render
+
+def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
+    
+    cursor = conn.cursor()
+
+    # Construir el query base
+    query = "SELECT cliente, estado, municipio, group_name, number2, text_data FROM extraccion4 WHERE 1=1"
+    params = []
+
+    # Agregar filtros opcionales
+    if nombre_cliente:
+        query += " AND LOWER(cliente) LIKE LOWER(%s)"
+        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
+
+    if estado:
+        query += " AND LOWER(estado) LIKE LOWER(%s)"
+        params.append(f"%{estado}%")
+
+    if municipio:
+        query += " AND LOWER(municipio) LIKE LOWER(%s)"
+        params.append(f"%{municipio}%")
+
+    if group_name:
+        query += " AND LOWER(group_name) LIKE LOWER(%s)"
+        params.append(f"%{group_name}%")
+    
+    if number2:
+        query += " AND LOWER(number2) LIKE LOWER(%s)"
+        params.append(f"%{number2}%")
+
+    # Ejecutar el query con los parámetros
+    cursor.execute(query, tuple(params))
+    results = cursor.fetchall()
+
+    # Verificar si hay resultados
+    if not results:
+        cursor.close()
+        conn.close()
+        return None  # Devuelve None si no hay resultados
+
+    # Crear un DataFrame
+    df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
+
+    # Cerrar la conexión
+    cursor.close()
+    conn.close()
+
+    print(df.head())
+    return df
+
+
+
+# Procesar datos
+import re
+from nltk.corpus import stopwords
+from collections import Counter
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+
+def generar_nube_palabras(nombre_cliente, estado, municipio, group_name):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name)
+
+    # Asegúrate de descargar las stopwords
+    #import nltk
+    #nltk.download('stopwords')
+    
+    # Obtener stopwords en español
+    stop_words = set(stopwords.words('spanish'))
+    # Agregar stopwords personalizadas
+    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 
+    'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
+    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 
+    'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
+    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 
+    'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
+    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 
+    'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
+    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 
+    'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
+    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 
+    'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
+    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 
+    'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
+    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos',
+    'días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
+    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 
+    'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
+    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 
+    'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
+    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 
+    'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
+    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 
+    'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
+    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 
+    'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
+    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 
+    'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
+    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 
+    'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
+    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 
+    'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
+    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 
+    'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
+    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 
+    'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
+    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 
+    'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
+    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 
+    'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
+    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 
+    'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
+    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 
+    'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
+    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 
+    'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
+    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 
+    'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
+    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 
+    'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
+    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 
+    'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
+    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 
+    'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
+    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena',
+    'm', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
+
+    # Combinar todos los textos en una sola cadena
+    texto_combinado = ' '.join(df['text_data'].dropna())
+
+    # Preprocesar el texto
+    palabras = re.findall(r'\w+', texto_combinado.lower())
+    palabras_filtradas = [palabra for palabra in palabras if palabra not in stop_words and not palabra.isdigit()]
+
+    # Contar las frecuencias de palabras
+    frecuencias = Counter(palabras_filtradas)
+
+    # Generar la nube de palabras
+    nube_palabras = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(frecuencias)
+
+    # Convertir la nube de palabras a imagen en base64 para renderizar en el template
+    buffer = BytesIO()
+    nube_palabras.to_image().save(buffer, format='PNG')
+    buffer.seek(0)
+    imagen_nube = base64.b64encode(buffer.read()).decode('utf-8')
+
+    return imagen_nube
+
+# Crear la vista para renderizar la nube
+from django.contrib import messages
+from django.shortcuts import render
+
+def nube_palabras_view(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:  # Verifica si el usuario es un admin
+            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
+        else:
+            nombre_cliente = request.user.username  # Usa su nombre de usuario
+    else:
+        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
+
+    estado = request.GET.get('estado')
+    municipio = request.GET.get('municipio')
+    group_name = request.GET.get('group_name')
+
+    # Genera la nube de palabras usando el nombre de cliente proporcionado
+    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name)
+
+    # Verifica si la imagen de la nube de palabras está vacía (significa que no hay datos)
+    if imagen_nube is None or not imagen_nube.strip():
+        messages.warning(request, "No se encontraron datos que coincidan con la búsqueda.")
+
+    return render(request, 'tu_template.html', {
+        'imagen_nube': imagen_nube,
+        'nombre_cliente': nombre_cliente,
+        'estado': estado,
+        'municipio': municipio,
+        'group_name': group_name
+    })
+
+
+from django.shortcuts import render
+import mysql.connector
+import pandas as pd
+
+# Crear vista para renderizar la tabla
+def tabla_datos_view(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:  # Verifica si el usuario es un admin
+            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
+        else:
+            nombre_cliente = request.user.username  # Usa su nombre de usuario
+    else:
+        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
+
+    estado = request.GET.get('estado')
+    municipio = request.GET.get('municipio')
+    group_name = request.GET.get('group_name')
+    number2 = request.GET.get('number2')
+
+    # Conectar a la base de datos
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
+    
+    cursor = conn.cursor()
+
+    # Construir el query base
+    query = "SELECT * FROM extraccion4 WHERE 1=1"
+    params = []
+
+    # Agregar filtros opcionales
+    if nombre_cliente:
+        query += " AND LOWER(cliente) LIKE LOWER(%s)"
+        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
+
+    if estado:
+        query += " AND LOWER(estado) LIKE LOWER(%s)"
+        params.append(f"%{estado}%")
+
+    if municipio:
+        query += " AND LOWER(municipio) LIKE LOWER(%s)"
+        params.append(f"%{municipio}%")
+
+    if group_name:
+        query += " AND LOWER(group_name) LIKE LOWER(%s)"
+        params.append(f"%{group_name}%")
+
+    if number2:
+        query += " AND LOWER(number2) LIKE LOWER(%s)"
+        params.append(f"%{number2}%")
+
+    # Ejecutar el query con los parámetros
+    cursor.execute(query, tuple(params))
+    results = cursor.fetchall()
+
+    # Crear un DataFrame si hay resultados
+    if results:
+        df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
+        # Convertir DataFrame a lista de diccionarios
+        datos_tabla = df.to_dict(orient='records')
+    else:
+        datos_tabla = []  # Cambiar a lista vacía si no hay resultados
+
+    # Cerrar la conexión
+    cursor.close()
+    conn.close()
+
+    # Renderizar la plantilla con los datos
+    return render(request, 'tu_template.html', {
+        'datos_tabla': datos_tabla,
+        'nombre_cliente': nombre_cliente,
+        'estado': estado,
+        'municipio': municipio,
+        'group_name': group_name,
+        'number2': number2
+    })
+
+    
+
+
