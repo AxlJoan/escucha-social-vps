@@ -80,16 +80,19 @@ WSGI_APPLICATION = 'nube_palabras.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+import os
+
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'data_wa',
-            'USER': 'admin',
-            'PASSWORD': 'F@c3b00k',
-            'HOST': '158.69.26.160',
-            'PORT': '3306',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'data_wa'),  # Nombre de la base de datos
+        'USER': os.environ.get('DB_USER', 'admin'),    # Usuario de la base de datos
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'F@c3b00k'),  # Contraseña de la base de datos
+        'HOST': os.environ.get('DB_HOST', '158.69.26.160'),  # Host de la base de datos
+        'PORT': os.environ.get('DB_PORT', '3306'),        # Puerto de la base de datos
     }
+}
+
 
 CACHES = {
     "default": {
