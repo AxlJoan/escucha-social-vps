@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-iy$plyxm-d*zu$y0k1toqyc&+-&n*3l=bp5@=obrk2k*fst!fp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1","nube-palabras.zapto.org","escuchasocial.zapto.org","216.225.196.110","187.190.174.234"]
+ALLOWED_HOSTS = ["127.0.0.1", "nube-palabras.zapto.org", "escuchasocial.zapto.org", "216.225.196.110", "187.190.174.234", "escucha-social.onrender.com"]
 
 
 # Application definition
