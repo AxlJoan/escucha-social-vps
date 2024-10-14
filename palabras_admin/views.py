@@ -342,8 +342,8 @@ def generar_nube_palabras(nombre_cliente, estado, municipio, group_name):
     df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name)
 
     # Asegúrate de descargar las stopwords
-    #import nltk
-    #nltk.download('stopwords')
+    import nltk
+    nltk.download('stopwords')
     
     # Obtener stopwords en español
     stop_words = set(stopwords.words('spanish'))
