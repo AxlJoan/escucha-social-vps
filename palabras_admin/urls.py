@@ -35,5 +35,6 @@ urlpatterns = [
     path('nube/', views.generar_nube_palabras, name='nube_palabras'),
     path('nube_palabras/', nube_palabras_view, name='nube_palabras'),
     path('tabla_datos/', tabla_datos_view, name='tabla_datos'),
+    path('insertar_mensajes/', views.insertar_mensajes_view, name='insertar_mensajes'),
 
 ]
