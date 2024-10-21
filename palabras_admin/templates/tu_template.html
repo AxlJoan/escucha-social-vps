@@ -113,24 +113,6 @@
             opacity: 1;
         }
 
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .pagination .step-links a {
-            margin: 0 5px;
-            text-decoration: none;
-            padding: 5px 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            color: #333;
-        }
-        
-        .pagination .step-links span {
-            margin: 0 5px;
-        }
-
 
         .nube-container {
             margin-top: 40px;
@@ -340,7 +322,7 @@
         {% endif %}
 
         <!-- Tabla de datos -->
-        {% if page_obj %}
+        {% if datos_tabla %}
         <div class="data-table">
             <h2>Datos Extraídos</h2>
             <table>
@@ -352,10 +334,11 @@
                         <th>Grupo</th>
                         <th>Número</th>
                         <th>Mensaje</th>
+
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in page_obj %}
+                    {% for row in datos_tabla %}
                     <tr>
                         <td>{{ row.cliente }}</td>
                         <td>{{ row.estado }}</td>
@@ -367,23 +350,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-        
-        <!-- Controles de paginación -->
-        <div class="pagination">
-            <span class="step-links">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; primera</a>
-                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
-                {% endif %}
-        
-                <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
-                {% endif %}
-            </span>
         </div>
         {% endif %}
     </main>
