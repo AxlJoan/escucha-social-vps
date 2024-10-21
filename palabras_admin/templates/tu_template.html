@@ -61,7 +61,7 @@
         }
 
         .form-row {
-            width: 50%;
+            width: 100%;
             margin: 0 auto;
         }
 
@@ -225,27 +225,27 @@
         <form method="GET">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="cliente">Cliente:</label>
+
                     <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
                 </div>
 
                 <div class="form-group">
-                    <label for="cliente">Estado:</label>
+
                     <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
                 </div>
 
                 <div class="form-group">
-                    <label for="cliente">Municipio:</label>
+
                     <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
                 </div>
 
                 <div class="form-group">
-                    <label for="cliente">Grupo:</label>
+
                     <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
                 </div>
 
                 <div class="form-group"></div>
-                    <label for="cliente">Celular:</label>
+
                     <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
                 </div>
             </div>
@@ -264,6 +264,10 @@
         </form>
 
         <!-- Formulario separado para la inserción de mensajes por administradores -->
+
+        <!-- Espacio entre los formularios-->
+        <div style="margin-top: 20px;"></div>
+        
         {% if user.is_staff %}
             <form method="POST">
               <div>
