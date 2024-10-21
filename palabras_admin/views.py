@@ -529,6 +529,11 @@ def tabla_datos_view(request):
     cursor.close()
     conn.close()
 
+    # Paginación
+    paginator = Paginator(datos_tabla, 100)  # Mostrar 100 registros por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     # Renderizar la plantilla con los datos
     return render(request, 'tu_template.html', {
         'datos_tabla': datos_tabla,
@@ -538,6 +543,49 @@ def tabla_datos_view(request):
         'group_name': group_name,
         'number2': number2
     })
+
+# Función para insertar mensajes como administrador a la base de datos "data_wa"
+from django.http import HttpResponseForbidden
+
+from django.http import HttpResponseForbidden
+import mysql.connector
+
+def insertar_mensajes_view(request):    
+    # Verificar si el usuario es un administrador
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+
+    if request.method == 'POST':
+        text_data = request.POST.get('text_data')  # Usar el nombre adecuado
+        cantidad = int(request.POST.get('cantidad', 0))
+        cliente = request.POST.get('cliente')  # Obtener el cliente del formulario
+
+        if text_data and cantidad > 0 and cliente:
+            # Conectar a la base de datos
+            conn = mysql.connector.connect(
+                host='158.69.26.160',
+                user='admin',
+                password='F@c3b00k',
+                database='data_wa'
+            )
+            cursor = conn.cursor()
+
+            # Insertar los mensajes en la base de datos
+            sql = "INSERT INTO extraccion4 (text_data, cliente) VALUES (%s, %s)"
+            data = [(text_data, cliente)] * cantidad  # Crear una lista con el mensaje y el cliente repetido
+            
+            try:
+                cursor.executemany(sql, data)
+                conn.commit()
+                mensaje = f"Se han insertado {cantidad} mensajes con el texto '{text_data}' para el cliente '{cliente}'."
+            except Exception as e:
+                mensaje = f"Ocurrió un error: {str(e)}"
+            finally:
+                # Cerrar la conexión
+                cursor.close()
+                conn.close()
+
+    return render(request, 'tu_template.html', {'mensaje': mensaje})
 
     
 
