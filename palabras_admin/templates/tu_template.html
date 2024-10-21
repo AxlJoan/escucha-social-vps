@@ -56,23 +56,18 @@
             width: 100%;
             max-width: 1000px;
             padding: 20px;
-            display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .form-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            width: 100%;
+            width: 50%;
+            margin: 0 auto;
         }
 
         .form-group {
-            display: flex;
-            align-items: center;
-            margin-right: 10px;
-            flex: 1;
+            width: 100%;
+            font-family: "Arial", Times, serif;
         }
 
         label {
@@ -81,30 +76,41 @@
             margin-right: 10px;
         }
 
-        input[type="text"] {
-            flex: 1;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            font-size: 1rem;
+        .form-group-input[type="text"] {
+          width: 100%;
+          color: #292929;
+          font-size: 18px;
+          background-color: #E9E9E9;
+          border: 1px solid #E9E9E9;
+          -moz-border-radius: 5px;
+          -webkit-border-radius: 5px;
+          border-radius: 5px;
+          height: 40px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid #ccc;
+          border-left: 1px solid #ccc;
+          text-indent: 20px;
         }
 
         button {
-            display: block;
-            width: 100%;
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+          width: 100%;
+          font-size: 18px;
+          border-radius: 4px;
+          color: #fff;
+          height: 40px;
+          opacity: .8;
+          margin-bottom: 20px;
+          cursor: pointer;
+          background: #B22222;
+          display: block;
+          border: none;
+          border-bottom: 1px solid #500707;
+          border-right: 1px solid #500707;
+          transition: 1s;
         }
 
         button:hover {
-            background-color: #45a049;
+            opacity: 1;
         }
 
         .nube-container {
@@ -124,20 +130,24 @@
         }
 
         .download-button {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            font-size: 1rem;
-            border: none;
-            border-radius: 10px;
-            text-decoration: none;
-            cursor: pointer;
+            width: 100%;
+          font-size: 18px;
+          border-radius: 4px;
+          color: #fff;
+          height: 40px;
+          opacity: .8;
+          margin-bottom: 20px;
+          cursor: pointer;
+          background: #B22222;
+          display: block;
+          border: none;
+          border-bottom: 1px solid #500707;
+          border-right: 1px solid #500707;
+          transition: 1s;
         }
 
         .download-button:hover {
-            background-color: #0056b3;
+            opacity: 1;
         }
 
         table {
@@ -173,20 +183,8 @@
             }
         }
 
-        @media (max-width: 768px) {
-            main {
-                width: 90%;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .nube-container img {
-                max-width: 100%;
-            }
-        }
     </style>
+
 
     <script>
         window.onload = function() {
@@ -228,27 +226,27 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="cliente">Cliente:</label>
-                    <input type="text" id="cliente" name="cliente" value="{{ nombre_cliente }}">
+                    <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
                 </div>
 
                 <div class="form-group">
-                    <label for="estado">Estado:</label>
-                    <input type="text" id="estado" name="estado" value="{{ estado }}">
+                    <label for="cliente">Estado:</label>
+                    <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
                 </div>
 
                 <div class="form-group">
-                    <label for="municipio">Municipio:</label>
-                    <input type="text" id="municipio" name="municipio" value="{{ municipio }}">
+                    <label for="cliente">Municipio:</label>
+                    <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
                 </div>
 
                 <div class="form-group">
-                    <label for="group_name">Grupo:</label>
-                    <input type="text" id="group_name" name="group_name" value="{{ group_name }}">
+                    <label for="cliente">Grupo:</label>
+                    <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
                 </div>
 
                 <div class="form-group"></div>
-                    <label for="group_name">Número:</label>
-                    <input type="text" id="number2" name="number2" value="{{ number2 }}">
+                    <label for="cliente">Celular:</label>
+                    <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
                 </div>
             </div>
 
@@ -268,6 +266,7 @@
         <!-- Formulario separado para la inserción de mensajes por administradores -->
         {% if user.is_staff %}
             <form method="POST">
+              <div>
                 {% csrf_token %}
                 <label for="cliente">Cliente:</label>
                 <input type="text" id="cliente" name="cliente" required>
@@ -279,6 +278,7 @@
                 <input type="number" id="cantidad" name="cantidad" min="1" required>
             
                 <button type="submit" formaction="{% url 'insertar_mensajes' %}">Insertar Mensajes</button>
+              </div>
             </form>
     {% else %}
         <p>Bienvenido a tu nube de palabras.</p>
@@ -289,7 +289,8 @@
     {% endif %}
 
 
-        <!-- Indicador de carga -->
+
+        <!-- Indicador de carga --> 
         <div class="loading">Cargando el proceso, por favor espera...</div>
 
         <!-- Nube de Palabras -->
