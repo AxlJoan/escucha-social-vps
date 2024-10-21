@@ -113,6 +113,25 @@
             opacity: 1;
         }
 
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pagination .step-links a {
+            margin: 0 5px;
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            color: #333;
+        }
+        
+        .pagination .step-links span {
+            margin: 0 5px;
+        }
+
+
         .nube-container {
             margin-top: 40px;
             text-align: center;
@@ -280,6 +299,9 @@
             
                 <label for="cantidad">Cantidad:</label>
                 <input type="number" id="cantidad" name="cantidad" min="1" required>
+
+                <!-- Espacio entre los botones -->
+                <div style="margin-top: 20px;"></div>
             
                 <button type="submit" formaction="{% url 'insertar_mensajes' %}">Insertar Mensajes</button>
               </div>
