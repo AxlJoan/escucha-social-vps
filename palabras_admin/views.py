@@ -536,7 +536,7 @@ def tabla_datos_view(request):
 
     # Renderizar la plantilla con los datos
     return render(request, 'tu_template.html', {
-        'datos_tabla': datos_tabla,
+        'page_obj': page_obj,
         'nombre_cliente': nombre_cliente,
         'estado': estado,
         'municipio': municipio,
