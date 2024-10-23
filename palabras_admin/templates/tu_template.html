@@ -56,13 +56,13 @@
             width: 100%;
             max-width: 1000px;
             padding: 20px;
-            flex-direction: column;
-            align-items: center;
+            
         }
 
         .form-row {
             width: 100%;
             margin: 0 auto;
+            align-items: center;
         }
 
         .form-group {
@@ -133,6 +133,7 @@
         .nube-container {
             margin-top: 40px;
             text-align: center;
+            align-items: center;
             animation: fadeIn 0.8s ease-out;
         }
 
@@ -169,9 +170,7 @@
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 40px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left: 0; /* Alinea la tabla a la izquierda */
         }
 
         th, td {
@@ -283,6 +282,82 @@
         <!-- Indicador de carga --> 
         <div class="loading">Cargando el proceso, por favor espera...</div>
 
+    <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
+    {% if estados_municipios %}
+        <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
+        <div id="statesMunicipalitiesContainer" style="display: none;">
+            <ul>
+                {% for item in estados_municipios %}
+                    <li>
+                        Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
+                    </li>
+                {% empty %}
+                <center>
+                    <li>No hay estados ni municipios disponibles.</li>
+                </center>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <center>
+            <p><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
+        </center>
+    {% endif %}
+    
+    <script>
+        // Solo añadir el evento si el botón existe en el DOM
+        const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
+                // Alternar la visibilidad del contenedor
+                if (statesMunicipalitiesContainer.style.display === 'none') {
+                    statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
+                    this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
+                } else {
+                    statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
+                    this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
+                }
+            });
+        }
+    </script>      
+
+    <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
+    {% if grupos %}
+        <button id="toggleGroupsBtn">Mostrar Grupos</button>
+        <div id="groupsContainer" style="display: none;">
+            <ul>
+                {% for item in grupos %}
+                    <li>Grupo: <b>{{ item.group_name }}</b></li>
+                {% empty %}
+                    <li>No hay grupos disponibles.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <center>
+            <p><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
+        </center>
+    {% endif %}
+
+    <script>
+        // Solo añadir el evento si el botón existe en el DOM
+        const groupsToggleButton = document.getElementById('toggleGroupsBtn');
+        if (groupsToggleButton) {
+            groupsToggleButton.addEventListener('click', function() {
+                const groupsContainer = document.getElementById('groupsContainer');
+                // Alternar la visibilidad del contenedor
+                if (groupsContainer.style.display === 'none') {
+                    groupsContainer.style.display = 'block'; // Muestra los grupos
+                    this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
+                } else {
+                    groupsContainer.style.display = 'none'; // Oculta los grupos
+                    this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
+                }
+            });
+        }
+    </script>
+
         <!-- Formulario separado para la inserción de mensajes por administradores -->
         <!-- Espacio entre los formularios-->
         <div style="margin-top: 20px;"></div>
@@ -306,7 +381,7 @@
 
                 <input type="text" class = "form-group-input" id="group_name" name="group_name" placeholder = Grupo>
             
-                <label for="cantidad">Cantidad de mensajes a añadir:</label>
+                <center><label for="cantidad">Cantidad de mensajes a añadir:</label></center>
                 <input type="number" class = "form-group-number" id="cantidad" name="cantidad" min="1" required>
 
                 <!-- Espacio entre los botones -->
