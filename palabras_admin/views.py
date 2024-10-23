@@ -338,8 +338,8 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name)
+def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2)
 
     # Asegúrate de descargar las stopwords
     import nltk
@@ -442,9 +442,10 @@ def nube_palabras_view(request):
     estado = request.GET.get('estado')
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
+    number2 = request.GET.get('number2')
 
     # Genera la nube de palabras usando el nombre de cliente proporcionado
-    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name)
+    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2)
 
     # Verifica si la imagen de la nube de palabras está vacía (significa que no hay datos)
     if imagen_nube is None or not imagen_nube.strip():
@@ -455,7 +456,8 @@ def nube_palabras_view(request):
         'nombre_cliente': nombre_cliente,
         'estado': estado,
         'municipio': municipio,
-        'group_name': group_name
+        'group_name': group_name,
+        'number2': number2
     })
 
 
@@ -592,5 +594,3 @@ def insertar_mensajes_view(request):
     return render(request, 'tu_template.html', {'mensaje': mensaje})
 
     
-
-
