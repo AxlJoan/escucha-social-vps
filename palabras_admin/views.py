@@ -266,24 +266,6 @@ class PalabraCompartidaUpdateView(UpdateView):
     success_url = reverse_lazy('palabra-list')
 
 # ----------------------------- A partir de aquí inicia mi código ------------------------
-import mysql.connector
-from mysql.connector import pooling
-
-# Configuración del pool de conexiones
-dbconfig = {
-    "host": "158.69.26.160",
-    "user": "admin",
-    "password": "F@c3b00k",
-    "database": "data_wa"
-}
-
-# Crear el pool de conexiones
-connection_pool = pooling.MySQLConnectionPool(
-    pool_name="mypool",
-    pool_size=10,  # Ajusta según la carga esperada
-    **dbconfig
-)
-
 
 # Conectar a la base de datos
 import mysql.connector
@@ -291,7 +273,13 @@ import pandas as pd
 from django.shortcuts import render
 
 def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
-    conn = connection_pool.get_connection()
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
+    
     cursor = conn.cursor()
 
     # Construir el query base
@@ -501,7 +489,12 @@ def tabla_datos_view(request):
     grupos = obtener_grupos(nombre_cliente)
 
     # Conectar a la base de datos
-    conn = connection_pool.get_connection()
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
     
     cursor = conn.cursor()
 
@@ -585,7 +578,12 @@ def insertar_mensajes_view(request):
 
         if text_data and cantidad > 0 and cliente:
             # Conectar a la base de datos
-            conn = connection_pool.get_connection()
+            conn = mysql.connector.connect(
+                host='158.69.26.160',
+                user='admin',
+                password='F@c3b00k',
+                database='data_wa'
+            )
             cursor = conn.cursor()
 
             # Insertar los mensajes en la base de datos
@@ -606,7 +604,13 @@ def insertar_mensajes_view(request):
     return render(request, 'tu_template.html', {'mensaje': mensaje})
 
 def obtener_estados_municipios_distintos(nombre_cliente):
-    conn = connection_pool.get_connection()
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
+    
     cursor = conn.cursor()
 
     # Consulta para obtener estados y municipios distintos
@@ -628,7 +632,13 @@ def obtener_estados_municipios_distintos(nombre_cliente):
     return estados_municipios
 
 def obtener_grupos(nombre_cliente):
-    conn = connection_pool.get_connection()
+    conn = mysql.connector.connect(
+        host='158.69.26.160',
+        user='admin',
+        password='F@c3b00k',
+        database='data_wa'
+    )
+    
     cursor = conn.cursor()
 
     # Consulta para obtener grupos distintos
@@ -651,4 +661,3 @@ def obtener_grupos(nombre_cliente):
 
 from django.http import JsonResponse
 import mysql.connector
-  
