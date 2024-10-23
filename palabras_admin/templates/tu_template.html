@@ -278,6 +278,18 @@
             
                 <label for="mensaje">Añadir Mensaje:</label>
                 <input type="text" id="text_data" name="text_data" required>
+
+                <label for="number2">Número de teléfono:</label>
+                <input type="text" id="number2" name="number2" required>
+
+                <label for="estado">Estado:</label>
+                <input type="text" id="estado" name="estado" required>
+
+                <label for="municipio">Municipio:</label>
+                <input type="text" id="municipio" name="municipio" required>
+
+                <label for="group_name">Grupo:</label>
+                <input type="text" id="group_name" name="group_name">
             
                 <label for="cantidad">Cantidad:</label>
                 <input type="number" id="cantidad" name="cantidad" min="1" required>
@@ -289,7 +301,10 @@
               </div>
             </form>
     {% else %}
-        <p>Bienvenido a tu nube de palabras.</p>
+        <center>
+            <h1>Bienvenido a tu nube de palabras.</h1>
+        </center>
+
     {% endif %}
 
     {% if mensaje %}
