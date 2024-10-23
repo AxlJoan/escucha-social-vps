@@ -266,6 +266,24 @@ class PalabraCompartidaUpdateView(UpdateView):
     success_url = reverse_lazy('palabra-list')
 
 # ----------------------------- A partir de aquí inicia mi código ------------------------
+import mysql.connector
+from mysql.connector import pooling
+
+# Configuración del pool de conexiones
+dbconfig = {
+    "host": "158.69.26.160",
+    "user": "admin",
+    "password": "F@c3b00k",
+    "database": "data_wa"
+}
+
+# Crear el pool de conexiones
+connection_pool = pooling.MySQLConnectionPool(
+    pool_name="mypool",
+    pool_size=10,  # Ajusta según la carga esperada
+    **dbconfig
+)
+
 
 # Conectar a la base de datos
 import mysql.connector
@@ -273,13 +291,7 @@ import pandas as pd
 from django.shortcuts import render
 
 def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='F@c3b00k',
-        database='data_wa'
-    )
-    
+    conn = connection_pool.get_connection()
     cursor = conn.cursor()
 
     # Construir el query base
@@ -339,7 +351,7 @@ from io import BytesIO
 import base64
 
 def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2)
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name,)
 
     # Asegúrate de descargar las stopwords
     import nltk
@@ -443,6 +455,9 @@ def nube_palabras_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    # Obtener estados y municipios distintos
+    estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
+    grupos = obtener_grupos(nombre_cliente)
 
     # Genera la nube de palabras usando el nombre de cliente proporcionado
     imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2)
@@ -457,7 +472,9 @@ def nube_palabras_view(request):
         'estado': estado,
         'municipio': municipio,
         'group_name': group_name,
-        'number2': number2
+        'number2': number2,
+        'estados_municipios': estados_municipios,
+        'grupos': grupos,
     })
 
 
@@ -479,14 +496,12 @@ def tabla_datos_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    # Obtener estados y municipios distintos
+    estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
+    grupos = obtener_grupos(nombre_cliente)
 
     # Conectar a la base de datos
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='F@c3b00k',
-        database='data_wa'
-    )
+    conn = connection_pool.get_connection()
     
     cursor = conn.cursor()
 
@@ -543,7 +558,9 @@ def tabla_datos_view(request):
         'estado': estado,
         'municipio': municipio,
         'group_name': group_name,
-        'number2': number2
+        'number2': number2,
+        'estados_municipios': estados_municipios,
+        'grupos': grupos,
     })
 
 # Función para insertar mensajes como administrador a la base de datos "data_wa"
@@ -568,12 +585,7 @@ def insertar_mensajes_view(request):
 
         if text_data and cantidad > 0 and cliente:
             # Conectar a la base de datos
-            conn = mysql.connector.connect(
-                host='158.69.26.160',
-                user='admin',
-                password='F@c3b00k',
-                database='data_wa'
-            )
+            conn = connection_pool.get_connection()
             cursor = conn.cursor()
 
             # Insertar los mensajes en la base de datos
@@ -593,4 +605,50 @@ def insertar_mensajes_view(request):
 
     return render(request, 'tu_template.html', {'mensaje': mensaje})
 
+def obtener_estados_municipios_distintos(nombre_cliente):
+    conn = connection_pool.get_connection()
+    cursor = conn.cursor()
+
+    # Consulta para obtener estados y municipios distintos
+    query = """
+        SELECT DISTINCT estado, municipio
+        FROM extraccion4 
+        WHERE LOWER(cliente) = LOWER(%s)
+    """
     
+    cursor.execute(query, (nombre_cliente,))
+    resultados = cursor.fetchall()
+
+    # Cerrar la conexión
+    cursor.close()
+    conn.close()
+
+    # Convertir resultados en un diccionario
+    estados_municipios = [{"estado": row[0], "municipio": row[1]} for row in resultados]
+    return estados_municipios
+
+def obtener_grupos(nombre_cliente):
+    conn = connection_pool.get_connection()
+    cursor = conn.cursor()
+
+    # Consulta para obtener grupos distintos
+    query = """
+        SELECT DISTINCT group_name 
+        FROM extraccion4 
+        WHERE LOWER(cliente) = LOWER(%s)
+    """
+    
+    cursor.execute(query, (nombre_cliente,))
+    resultados = cursor.fetchall()
+
+    # Cerrar la conexión
+    cursor.close()
+    conn.close()
+
+    # Convertir resultados en un diccionario
+    grupos = [{"group_name": row[0]} for row in resultados]
+    return grupos
+
+from django.http import JsonResponse
+import mysql.connector
+  
