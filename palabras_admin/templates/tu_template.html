@@ -280,8 +280,10 @@
             </div>
         </form>
 
-        <!-- Formulario separado para la inserción de mensajes por administradores -->
+        <!-- Indicador de carga --> 
+        <div class="loading">Cargando el proceso, por favor espera...</div>
 
+        <!-- Formulario separado para la inserción de mensajes por administradores -->
         <!-- Espacio entre los formularios-->
         <div style="margin-top: 20px;"></div>
         
@@ -315,7 +317,7 @@
             </form>
     {% else %}
         <center>
-            <h1>Bienvenido a tu nube de palabras.</h1>
+            <h1>Bienvenido a tu nube de palabras, tu cliente es: {{ user.username }}.</h1>
         </center>
 
     {% endif %}
@@ -324,10 +326,6 @@
         <p>{{ mensaje }}</p>
     {% endif %}
 
-
-
-        <!-- Indicador de carga --> 
-        <div class="loading">Cargando el proceso, por favor espera...</div>
 
         <!-- Nube de Palabras -->
         {% if imagen_nube %}
@@ -341,6 +339,9 @@
             {% endif %}
             {% if group_name %}
                 <p>Grupo: {{ group_name }}</p>
+            {% endif %}
+            {% if number2 %}
+                <p>Número de celular: {{ number2 }}</p>
             {% endif %}
             <img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
 
