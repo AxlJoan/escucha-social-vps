@@ -559,6 +559,10 @@ def insertar_mensajes_view(request):
         text_data = request.POST.get('text_data')  # Usar el nombre adecuado
         cantidad = int(request.POST.get('cantidad', 0))
         cliente = request.POST.get('cliente')  # Obtener el cliente del formulario
+        number2 = request.POST.get('number2') # Obtener el número de teléfono del formulario
+        estado = request.POST.get('estado')
+        municipio = request.POST.get('municipio')
+        group_name = request.POST.get('group_name')
 
         if text_data and cantidad > 0 and cliente:
             # Conectar a la base de datos
@@ -571,13 +575,13 @@ def insertar_mensajes_view(request):
             cursor = conn.cursor()
 
             # Insertar los mensajes en la base de datos
-            sql = "INSERT INTO extraccion4 (text_data, cliente) VALUES (%s, %s)"
-            data = [(text_data, cliente)] * cantidad  # Crear una lista con el mensaje y el cliente repetido
+            sql = "INSERT INTO extraccion4 (text_data, cliente, number2, estado, municipio, group_name) VALUES (%s, %s, %s, %s, %s, %s)"
+            data = [(text_data, cliente, number2, estado, municipio, group_name)] * cantidad  # Crear una lista con el mensaje y el cliente repetido
             
             try:
                 cursor.executemany(sql, data)
                 conn.commit()
-                mensaje = f"Se han insertado {cantidad} mensajes con el texto '{text_data}' para el cliente '{cliente}'."
+                mensaje = f"Se han insertado {cantidad} mensajes con el texto '{text_data}' para el cliente '{cliente}' utilizando el siguiente número '{number2}', dentro del estado y municipio de '{estado}', '{municipio}'."
             except Exception as e:
                 mensaje = f"Ocurrió un error: {str(e)}"
             finally:
