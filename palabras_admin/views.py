@@ -276,7 +276,7 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
-        password='F@c3b00k',
+        password='S3gur1d4d2025',
         database='data_wa'
     )
     
@@ -492,7 +492,7 @@ def tabla_datos_view(request):
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
-        password='F@c3b00k',
+        password='S3gur1d4d2025',
         database='data_wa'
     )
     
@@ -581,7 +581,7 @@ def insertar_mensajes_view(request):
             conn = mysql.connector.connect(
                 host='158.69.26.160',
                 user='admin',
-                password='F@c3b00k',
+                password='S3gur1d4d2025',
                 database='data_wa'
             )
             cursor = conn.cursor()
@@ -607,7 +607,7 @@ def obtener_estados_municipios_distintos(nombre_cliente):
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
-        password='F@c3b00k',
+        password='S3gur1d4d2025',
         database='data_wa'
     )
     
@@ -635,7 +635,7 @@ def obtener_grupos(nombre_cliente):
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
-        password='F@c3b00k',
+        password='S3gur1d4d2025',
         database='data_wa'
     )
     
