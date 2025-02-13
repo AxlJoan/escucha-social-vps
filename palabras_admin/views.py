@@ -272,7 +272,7 @@ import mysql.connector
 import pandas as pd
 from django.shortcuts import render
 
-def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
+def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None, fecha_inicio=None, fecha_fin=None):
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
@@ -283,7 +283,7 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
     cursor = conn.cursor()
 
     # Construir el query base
-    query = "SELECT cliente, estado, municipio, group_name, number2, text_data FROM extraccion4 WHERE 1=1"
+    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
     params = []
 
     # Agregar filtros opcionales
@@ -307,6 +307,15 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
         query += " AND LOWER(number2) LIKE LOWER(%s)"
         params.append(f"%{number2}%")
 
+    # Filtrar por fecha (si ambos valores están presentes)
+    if fecha_inicio:
+        query += " AND timestamp >= %s"
+        params.append(fecha_inicio)
+    
+    if fecha_fin:
+        query += " AND timestamp <= %s"
+        params.append(fecha_fin)
+
     # Ejecutar el query con los parámetros
     cursor.execute(query, tuple(params))
     results = cursor.fetchall()
@@ -327,8 +336,6 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
     print(df.head())
     return df
 
-
-
 # Procesar datos
 import re
 from nltk.corpus import stopwords
@@ -338,8 +345,8 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name,)
+def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
 
     # Asegúrate de descargar las stopwords
     import nltk
@@ -348,62 +355,34 @@ def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2
     # Obtener stopwords en español
     stop_words = set(stopwords.words('spanish'))
     # Agregar stopwords personalizadas
-    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 
-    'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
-    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 
-    'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
-    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 
-    'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
-    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 
-    'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
-    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 
-    'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
-    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 
-    'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
-    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 
-    'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
-    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos',
-    'días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
-    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 
-    'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
-    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 
-    'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
-    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 
-    'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 
-    'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
-    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 
-    'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
-    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 
-    'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
-    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 
-    'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
-    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 
-    'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
-    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 
-    'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
-    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 
-    'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
-    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 
-    'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
-    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 
-    'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
-    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 
-    'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
-    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 
-    'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
-    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 
-    'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
-    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 
-    'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
-    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 
-    'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
-    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 
-    'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
-    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 
-    'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
-    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena',
-    'm', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
+    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
+    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
+    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
+    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
+    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
+    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
+    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
+    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos','días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
+    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
+    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
+    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
+    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
+    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
+    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
+    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
+    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
+    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
+    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
+    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
+    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
+    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
+    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
+    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
+    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
+    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
+    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
+    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
+    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena','m', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven']) # Coloca más stopwords de ser necesario
 
     # Combinar todos los textos en una sola cadena
     texto_combinado = ' '.join(df['text_data'].dropna())
@@ -443,6 +422,8 @@ def nube_palabras_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     # Obtener estados y municipios distintos
     estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
@@ -454,6 +435,9 @@ def nube_palabras_view(request):
     if imagen_nube is None or not imagen_nube.strip():
         messages.warning(request, "No se encontraron datos que coincidan con la búsqueda.")
 
+    # Realiza el análisis de sentimientos y asigna un semáforo
+    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
     return render(request, 'tu_template.html', {
         'imagen_nube': imagen_nube,
         'nombre_cliente': nombre_cliente,
@@ -461,8 +445,12 @@ def nube_palabras_view(request):
         'municipio': municipio,
         'group_name': group_name,
         'number2': number2,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
         'grupos': grupos,
+        'sentiment_score': score,
+        'sentiment_semaforo': semaforo,
     })
 
 
@@ -484,6 +472,8 @@ def tabla_datos_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     # Obtener estados y municipios distintos
     estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
@@ -499,7 +489,7 @@ def tabla_datos_view(request):
     cursor = conn.cursor()
 
     # Construir el query base
-    query = "SELECT * FROM extraccion4 WHERE 1=1"
+    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
     params = []
 
     # Agregar filtros opcionales
@@ -523,6 +513,15 @@ def tabla_datos_view(request):
         query += " AND LOWER(number2) LIKE LOWER(%s)"
         params.append(f"%{number2}%")
 
+    # Filtrar por fecha (si ambos valores están presentes)
+    if fecha_inicio:
+        query += " AND timestamp >= %s"
+        params.append(fecha_inicio)
+    
+    if fecha_fin:
+        query += " AND timestamp <= %s"
+        params.append(fecha_fin)
+
     # Ejecutar el query con los parámetros
     cursor.execute(query, tuple(params))
     results = cursor.fetchall()
@@ -544,6 +543,9 @@ def tabla_datos_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Realiza el análisis de sentimientos y asigna un semáforo
+    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
     # Renderizar la plantilla con los datos
     return render(request, 'tu_template.html', {
         'datos_tabla': datos_tabla,
@@ -552,9 +554,14 @@ def tabla_datos_view(request):
         'municipio': municipio,
         'group_name': group_name,
         'number2': number2,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
         'grupos': grupos,
+        'sentiment_score': score,
+        'sentiment_semaforo': semaforo,
     })
+
 
 # Función para insertar mensajes como administrador a la base de datos "data_wa"
 from django.http import HttpResponseForbidden
@@ -661,3 +668,121 @@ def obtener_grupos(nombre_cliente):
 
 from django.http import JsonResponse
 import mysql.connector
+
+# Test de funciones nuevas 06/02/2025
+
+def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
+    # Obtener el dataframe filtrado
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
+    # Combinar todos los textos en una sola cadena
+    texto_combinado = ' '.join(df['text_data'].dropna())
+
+    # Obtener stopwords en español
+    import nltk
+    nltk.download('stopwords', quiet=True)
+    stop_words = set(stopwords.words('spanish'))
+    # Agregar stopwords personalizadas
+    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
+    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
+    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
+    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
+    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
+    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
+    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
+    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos','días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
+    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
+    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
+    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
+    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
+    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
+    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
+    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
+    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
+    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
+    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
+    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
+    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
+    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
+    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
+    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
+    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
+    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
+    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
+    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
+    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena','m', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
+
+    # Preprocesar el texto
+    palabras = re.findall(r'\w+', texto_combinado.lower())
+    palabras_filtradas = [palabra for palabra in palabras if palabra not in stop_words and not palabra.isdigit()]
+
+    # Contar las frecuencias de palabras
+    frecuencias = Counter(palabras_filtradas)
+
+    # Obtener el top 10 de palabras más repetidas
+    top_palabras = frecuencias.most_common(10)
+
+    # Llamar a la función de análisis de sentimientos
+    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
+    return top_palabras, score, semaforo
+
+def top_palabras_view(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            nombre_cliente = request.GET.get('cliente')
+        else:
+            nombre_cliente = request.user.username
+    else:
+        nombre_cliente = 'prueba'
+
+    estado = request.GET.get('estado')
+    municipio = request.GET.get('municipio')
+    group_name = request.GET.get('group_name')
+    number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    # Generar el top 10 de palabras
+    top_palabras, score, semaforo = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
+    return render(request, 'tu_template.html', {
+        'top_palabras': top_palabras,
+        'score': score,
+        'semaforo': semaforo
+    })
+#--------------------------------------------------------------------------------    
+from transformers import pipeline
+
+# Cargar el modelo solo una vez para mejorar la eficiencia
+analizador_sentimientos = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+
+def analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
+    # Suponiendo que ya tienes una función para obtener los datos filtrados
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    
+    # Combina todo el texto en una cadena
+    texto_combinado = ' '.join(df['text_data'].dropna())
+    
+    # Si no hay texto disponible, devuelve un valor neutro
+    if not texto_combinado.strip():
+        return 0.5, 'amarillo'
+    
+    # Analizar sentimiento con Transformers
+    resultado = analizador_sentimientos(texto_combinado[:512])  # Límite de tokens
+
+    # Traducción de etiquetas
+    label_mapping = {
+        "1 star": "rojo",
+        "2 stars": "rojo",
+        "3 stars": "amarillo",
+        "4 stars": "verde",
+        "5 stars": "verde"
+    }
+
+    # Tomar la puntuación y el semáforo basado en la etiqueta del modelo
+    label = resultado[0]['label']
+    score = resultado[0]['score']
+    semaforo = label_mapping.get(label, "amarillo")
+
+    return score, semaforo
