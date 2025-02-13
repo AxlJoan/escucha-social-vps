@@ -39,7 +39,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #333;
+            background-color: #161b33;
             padding: 10px 0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             z-index: 1000;
@@ -78,7 +78,39 @@
 
         .form-group-input[type="text"] {
           width: 100%;
-          color: #292929;
+          color: #161b33;
+          font-size: 18px;
+          background-color: #E9E9E9;
+          border: 1px solid #E9E9E9;
+          -moz-border-radius: 5px;
+          -webkit-border-radius: 5px;
+          border-radius: 5px;
+          height: 40px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid #ccc;
+          border-left: 1px solid #ccc;
+          text-indent: 20px;
+        }
+
+        .form-group-input[type="password"] {
+          width: 100%;
+          color: #161b33;
+          font-size: 18px;
+          background-color: #E9E9E9;
+          border: 1px solid #E9E9E9;
+          -moz-border-radius: 5px;
+          -webkit-border-radius: 5px;
+          border-radius: 5px;
+          height: 40px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid #ccc;
+          border-left: 1px solid #ccc;
+          text-indent: 20px;
+        }
+
+        .form-group-input[type="email"] {
+          width: 100%;
+          color: #161b33;
           font-size: 18px;
           background-color: #E9E9E9;
           border: 1px solid #E9E9E9;
@@ -117,11 +149,11 @@
           opacity: .8;
           margin-bottom: 20px;
           cursor: pointer;
-          background: #B22222;
+          background: #3d5a80;
           display: block;
           border: none;
-          border-bottom: 1px solid #500707;
-          border-right: 1px solid #500707;
+          border-bottom: 1px solid #293241;
+          border-right: 1px solid #293241;
           transition: 1s;
         }
 
@@ -156,11 +188,11 @@
           opacity: .8;
           margin-bottom: 20px;
           cursor: pointer;
-          background: #B22222;
+          background: #3d5a80;
           display: block;
           border: none;
-          border-bottom: 1px solid #500707;
-          border-right: 1px solid #500707;
+          border-bottom: 1px solid #293241;
+          border-right: 1px solid #293241;
           transition: 1s;
         }
 
@@ -168,19 +200,95 @@
             opacity: 1;
         }
 
-        table {
+        .data-table {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
             width: 100%;
-            margin-left: 0; /* Alinea la tabla a la izquierda */
+            margin-top: 20px;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #617998;
+            color: white;
+        }
+
+        .sentiment-bar-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: center;
+            font-family: sans-serif;
+        }
+        /* La barra de sentimientos con fondo degradado: rojo a blanco a verde */
+        .sentiment-bar {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #ff4d4d, #ffffff, #4dff4d);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+            margin: 10px 0;
+        }
+        /* El indicador que marca la posición del sentimiento */
+        .sentiment-indicator {
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 30px;
+            background-color: #000;  /* Puedes ajustar el color del indicador */
+            border-radius: 5px;
+            transform: translateX(-50%);
+        }
+
+        .date-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;     
+        }
+
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .styled-date-input {
+            padding: 10px;
+            border: 2px solid #c4c4c4;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 160px;
+            transition: all 0.3s ease;
+        }
+
+        .styled-date-input:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+        }
+
+        .date-separator {
+            font-weight: bold;
+            font-size: 18px;
+            color: #666;
         }
 
         .loading {
@@ -240,29 +348,39 @@
         <!-- Formulario único para ambos procesos -->
         <form method="GET">
             <div class="form-row">
+                <center>
+                <h1>Bienvenido a tu nube de palabras.</h1>
+                <h2>Filtros de Búsqueda.</h2>
+                </center>
+                {% if user.is_staff %}
                 <div class="form-group">
-
                     <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
                 </div>
 
                 <div class="form-group">
-
                     <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
                 </div>
 
                 <div class="form-group">
-
                     <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
                 </div>
+                {% endif %}
 
                 <div class="form-group">
-
                     <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
                 </div>
 
-                <div class="form-group"></div>
-
+                <div class="form-group">
                     <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
+                </div>
+
+                <div class="date-container">
+                    <div class="date-input-group">
+                        <label for="fecha_inicio" class="date-label">Desde:</label>
+                        <input type="date" class="styled-date-input" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+                        <span class="date-separator">Hasta:</span>
+                        <input type="date" class="styled-date-input" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+                    </div>
                 </div>
             </div>
 
@@ -276,92 +394,133 @@
 
                 <!-- Botón para redirigir a la vista de tabla de datos -->
                 <button type="submit" formaction="{% url 'tabla_datos' %}">Análisis de Tabla</button>
+
             </div>
         </form>
 
         <!-- Indicador de carga --> 
-        <div class="loading">Cargando el proceso, por favor espera...</div>
+        <div class="loading">Cargando el proceso, por favor espera<span class="dots"></span></div>
 
-    <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
-    {% if estados_municipios %}
-        <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
-        <div id="statesMunicipalitiesContainer" style="display: none;">
-            <ul>
-                {% for item in estados_municipios %}
-                    <li>
-                        Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
-                    </li>
-                {% empty %}
-                <center>
-                    <li>No hay estados ni municipios disponibles.</li>
-                </center>
-                {% endfor %}
-            </ul>
-        </div>
-    {% else %}
-        <center>
-            <p><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
-        </center>
-    {% endif %}
-    
-    <script>
-        // Solo añadir el evento si el botón existe en el DOM
-        const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
-        if (toggleButton) {
-            toggleButton.addEventListener('click', function() {
-                const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
-                // Alternar la visibilidad del contenedor
-                if (statesMunicipalitiesContainer.style.display === 'none') {
-                    statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
-                    this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
-                } else {
-                    statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
-                    this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
-                }
-            });
+        <style>
+        .loading {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
         }
-    </script>      
-
-    <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
-    {% if grupos %}
-        <button id="toggleGroupsBtn">Mostrar Grupos</button>
-        <div id="groupsContainer" style="display: none;">
-            <ul>
-                {% for item in grupos %}
-                    <li>Grupo: <b>{{ item.group_name }}</b></li>
-                {% empty %}
-                    <li>No hay grupos disponibles.</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% else %}
-        <center>
-            <p><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
-        </center>
-    {% endif %}
-
-    <script>
-        // Solo añadir el evento si el botón existe en el DOM
-        const groupsToggleButton = document.getElementById('toggleGroupsBtn');
-        if (groupsToggleButton) {
-            groupsToggleButton.addEventListener('click', function() {
-                const groupsContainer = document.getElementById('groupsContainer');
-                // Alternar la visibilidad del contenedor
-                if (groupsContainer.style.display === 'none') {
-                    groupsContainer.style.display = 'block'; // Muestra los grupos
-                    this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
-                } else {
-                    groupsContainer.style.display = 'none'; // Oculta los grupos
-                    this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
-                }
-            });
+        
+        .dots::after {
+            content: "";
+            display: inline-block;
+            animation: dots 1.5s infinite steps(4);
         }
-    </script>
+
+        @keyframes dots {
+            0% { content: ""; }
+            25% { content: "."; }
+            50% { content: ".."; }
+            75% { content: "..."; }
+            100% { content: ""; }
+        }
+        </style>
+
+
+        <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
+        {% if estados_municipios %}
+            <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
+            <div id="statesMunicipalitiesContainer" style="display: none;">
+                <ul>
+                    {% for item in estados_municipios %}
+                        <li>
+                            Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
+                        </li>
+                    {% empty %}
+                    <center>
+                        <li>No hay estados ni municipios disponibles.</li>
+                    </center>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <center>
+                <h3><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></h3>
+            </center>
+        {% endif %}
+        
+        <script>
+            // Solo añadir el evento si el botón existe en el DOM
+            const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
+            if (toggleButton) {
+                toggleButton.addEventListener('click', function() {
+                    const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
+                    // Alternar la visibilidad del contenedor
+                    if (statesMunicipalitiesContainer.style.display === 'none') {
+                        statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
+                        this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
+                    } else {
+                        statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
+                        this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
+                    }
+                });
+            }
+        </script>      
+
+        <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
+        {% if grupos %}
+            <button id="toggleGroupsBtn">Mostrar Grupos</button>
+            <div id="groupsContainer" style="display: none;">
+                <ul>
+                    {% for item in grupos %}
+                        <li>Grupo: <b>{{ item.group_name }}</b></li>
+                    {% empty %}
+                        <li>No hay grupos disponibles.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <center>
+                <h3><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></h3>
+            </center>
+        {% endif %}
+
+        <script>
+            // Solo añadir el evento si el botón existe en el DOM
+            const groupsToggleButton = document.getElementById('toggleGroupsBtn');
+            if (groupsToggleButton) {
+                groupsToggleButton.addEventListener('click', function() {
+                    const groupsContainer = document.getElementById('groupsContainer');
+                    // Alternar la visibilidad del contenedor
+                    if (groupsContainer.style.display === 'none') {
+                        groupsContainer.style.display = 'block'; // Muestra los grupos
+                        this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
+                    } else {
+                        groupsContainer.style.display = 'none'; // Oculta los grupos
+                        this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
+                    }
+                });
+            }
+        </script>
+
+        <!-- Formulario para crear usuarios nuevos -->
+        <!-- Espacio entre los formularios-->
+        <div style="margin-top: 20px;"></div>
+
+        {% if user.is_staff %}
+            <center>
+            <h1>Crear nuevo usuario:</h1>
+            </center>
+            <form method="POST">
+                <div class = 'form-row'>
+                  {% csrf_token %}
+                  <a href="/admin/auth/user/add/">
+                    <button type="button">Ir al formulario de creación de usuarios</button>
+                  </a>
+            </center>
+        {% endif %}
 
         <!-- Formulario separado para la inserción de mensajes por administradores -->
         <!-- Espacio entre los formularios-->
         <div style="margin-top: 20px;"></div>
-        
+
         {% if user.is_staff %}
             <form method="POST">
               <div class = 'form-row'>
@@ -390,16 +549,17 @@
                 <button type="submit" formaction="{% url 'insertar_mensajes' %}">Insertar Mensajes</button>
               </div>
             </form>
-    {% else %}
-        <center>
-            <h1>Bienvenido a tu nube de palabras, tu cliente es: {{ user.username }}.</h1>
-        </center>
+         {% else %}
+            <center>
+                <h2>Utilice los filtros para delimitar los datos a visualizar en la nube de palabras o la tabla de datos.</h2>
+            </center>
 
-    {% endif %}
+        {% endif %}
 
-    {% if mensaje %}
-        <p>{{ mensaje }}</p>
-    {% endif %}
+
+        {% if mensaje %}
+            <p>{{ mensaje }}</p>
+        {% endif %}
 
 
         <!-- Nube de Palabras -->
@@ -425,6 +585,41 @@
         </div>
         {% endif %}
 
+        <!-- Sección de Análisis de Sentimientos -->
+        <div class="sentiment-bar-container">
+            <p>Análisis de Sentimientos:</p>
+            <!-- La barra con el fondo degradado -->
+            <div class="sentiment-bar">
+              <!-- El indicador se posiciona dinámicamente según el puntaje -->
+              <div class="sentiment-indicator" style="left: {{ sentiment_percent }}%;"></div>
+          </div>
+
+        <center>
+        <h1>Top 10 Palabras Más Frecuentes</h1>
+        </center>
+        <table>
+        <thead>
+            <tr>
+            <th>Palabra</th>
+            <th>Frecuencia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for palabra, frecuencia in top_palabras %}
+            <tr>
+                <td>{{ palabra }}</td>
+                <td>{{ frecuencia }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+
+        <!-- Botón para consultar el top 10 -->
+        <form method="GET" action="{% url 'top_palabras_view' %}">
+            <button type="submit">Consultar Top 10 Palabras</button>
+        </form>
+
+        
         <!-- Tabla de datos -->
         {% if datos_tabla %}
         <div class="data-table">
@@ -432,21 +627,24 @@
             <table>
                 <thead>
                     <tr>
+                        {% if user.is_staff %}
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Municipio</th>
+                        {% endif %}
                         <th>Grupo</th>
                         <th>Número</th>
                         <th>Mensaje</th>
-
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in datos_tabla %}
                     <tr>
+                        {% if user.is_staff %}
                         <td>{{ row.cliente }}</td>
                         <td>{{ row.estado }}</td>
                         <td>{{ row.municipio }}</td>
+                        {% endif %}
                         <td>{{ row.group_name }}</td>
                         <td>{{ row.number2 }}</td>
                         <td>{{ row.text_data }}</td>
@@ -456,6 +654,7 @@
             </table>
         </div>
         {% endif %}
+
     </main>
 </body>
 </html>
