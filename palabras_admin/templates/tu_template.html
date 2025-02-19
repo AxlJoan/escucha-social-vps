@@ -506,13 +506,7 @@
         <!-- Nube de Palabras -->
         {% if imagen_nube %}
         <div class="nube-container">
-            <h2>Nube de Palabras para: {{ nombre_cliente }}</h2>
-            {% if estado %}
-                <p>Estado: {{ estado }}</p>
-            {% endif %}
-            {% if municipio %}
-                <p>Municipio: {{ municipio }}</p>
-            {% endif %}
+            <h2>Nube de Palabras</h2>
             {% if group_name %}
                 <p>Grupo: {{ group_name }}</p>
             {% endif %}
@@ -559,9 +553,11 @@
             <table>
                 <thead>
                     <tr>
+                        {% if user.is_staff %}
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Municipio</th>
+                        {% endif %}
                         <th>Grupo</th>
                         <th>Número</th>
                         <th>Mensaje</th>
@@ -571,9 +567,11 @@
                 <tbody>
                     {% for row in datos_tabla %}
                     <tr>
+                        {% if user.is_staff %}
                         <td>{{ row.cliente }}</td>
                         <td>{{ row.estado }}</td>
                         <td>{{ row.municipio }}</td>
+                        {% endif %}
                         <td>{{ row.group_name }}</td>
                         <td>{{ row.number2 }}</td>
                         <td>{{ row.text_data }}</td>
