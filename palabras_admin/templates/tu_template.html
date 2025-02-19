@@ -229,34 +229,6 @@
             color: white;
         }
 
-        .sentiment-bar-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            text-align: center;
-            font-family: sans-serif;
-        }
-        /* La barra de sentimientos con fondo degradado: rojo a blanco a verde */
-        .sentiment-bar {
-            position: relative;
-            width: 100%;
-            height: 20px;
-            border-radius: 10px;
-            background: linear-gradient(to right, #ff4d4d, #ffffff, #4dff4d);
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-            margin: 10px 0;
-        }
-        /* El indicador que marca la posición del sentimiento */
-        .sentiment-indicator {
-            position: absolute;
-            top: -5px;
-            width: 10px;
-            height: 30px;
-            background-color: #000;  /* Puedes ajustar el color del indicador */
-            border-radius: 5px;
-            transform: translateX(-50%);
-        }
-
         .date-container {
             display: flex;
             justify-content: center;
@@ -584,15 +556,6 @@
             <a href="#" class="download-button">Descargar Nube de Palabras</a>
         </div>
         {% endif %}
-
-        <!-- Sección de Análisis de Sentimientos -->
-        <div class="sentiment-bar-container">
-            <p>Análisis de Sentimientos:</p>
-            <!-- La barra con el fondo degradado -->
-            <div class="sentiment-bar">
-              <!-- El indicador se posiciona dinámicamente según el puntaje -->
-              <div class="sentiment-indicator" style="left: {{ sentiment_percent }}%;"></div>
-          </div>
 
         <center>
         <h1>Top 10 Palabras Más Frecuentes</h1>
