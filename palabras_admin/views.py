@@ -266,7 +266,6 @@ class PalabraCompartidaUpdateView(UpdateView):
     success_url = reverse_lazy('palabra-list')
 
 # ----------------------------- A partir de aquí inicia mi código ------------------------
-
 # Conectar a la base de datos
 import mysql.connector
 import pandas as pd
@@ -435,9 +434,6 @@ def nube_palabras_view(request):
     if imagen_nube is None or not imagen_nube.strip():
         messages.warning(request, "No se encontraron datos que coincidan con la búsqueda.")
 
-    # Realiza el análisis de sentimientos y asigna un semáforo
-    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
     return render(request, 'tu_template.html', {
         'imagen_nube': imagen_nube,
         'nombre_cliente': nombre_cliente,
@@ -448,9 +444,7 @@ def nube_palabras_view(request):
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
-        'grupos': grupos,
-        'sentiment_score': score,
-        'sentiment_semaforo': semaforo,
+        'grupos': grupos
     })
 
 
@@ -543,9 +537,6 @@ def tabla_datos_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Realiza el análisis de sentimientos y asigna un semáforo
-    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
     # Renderizar la plantilla con los datos
     return render(request, 'tu_template.html', {
         'datos_tabla': datos_tabla,
@@ -557,9 +548,7 @@ def tabla_datos_view(request):
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
-        'grupos': grupos,
-        'sentiment_score': score,
-        'sentiment_semaforo': semaforo,
+        'grupos': grupos
     })
 
 
@@ -722,10 +711,7 @@ def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2,
     # Obtener el top 10 de palabras más repetidas
     top_palabras = frecuencias.most_common(10)
 
-    # Llamar a la función de análisis de sentimientos
-    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    return top_palabras, score, semaforo
+    return top_palabras
 
 def top_palabras_view(request):
     if request.user.is_authenticated:
@@ -744,45 +730,10 @@ def top_palabras_view(request):
     fecha_fin = request.GET.get('fecha_fin')
 
     # Generar el top 10 de palabras
-    top_palabras, score, semaforo = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    top_palabras = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
 
     return render(request, 'tu_template.html', {
-        'top_palabras': top_palabras,
-        'score': score,
-        'semaforo': semaforo
+        'top_palabras': top_palabras
     })
 #--------------------------------------------------------------------------------    
-from transformers import pipeline
 
-# Cargar el modelo solo una vez para mejorar la eficiencia
-analizador_sentimientos = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
-
-def analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    # Suponiendo que ya tienes una función para obtener los datos filtrados
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-    
-    # Combina todo el texto en una cadena
-    texto_combinado = ' '.join(df['text_data'].dropna())
-    
-    # Si no hay texto disponible, devuelve un valor neutro
-    if not texto_combinado.strip():
-        return 0.5, 'amarillo'
-    
-    # Analizar sentimiento con Transformers
-    resultado = analizador_sentimientos(texto_combinado[:512])  # Límite de tokens
-
-    # Traducción de etiquetas
-    label_mapping = {
-        "1 star": "rojo",
-        "2 stars": "rojo",
-        "3 stars": "amarillo",
-        "4 stars": "verde",
-        "5 stars": "verde"
-    }
-
-    # Tomar la puntuación y el semáforo basado en la etiqueta del modelo
-    label = resultado[0]['label']
-    score = resultado[0]['score']
-    semaforo = label_mapping.get(label, "amarillo")
-
-    return score, semaforo
