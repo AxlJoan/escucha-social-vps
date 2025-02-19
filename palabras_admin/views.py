@@ -736,4 +736,79 @@ def top_palabras_view(request):
         'top_palabras': top_palabras
     })
 #--------------------------------------------------------------------------------    
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+import pandas as pd
+from pyvis.network import Network
+from .models import Extraccion4  # Asegúrate de importar tu modelo correctamente
 
+@login_required
+def generar_grafo_view(request):
+    # Verificar si el usuario es autenticado
+    if request.user.is_authenticated:
+        # Si el usuario es admin, obtener el cliente desde los parámetros GET
+        if request.user.is_staff:
+            nombre_cliente = request.GET.get('cliente')
+        else:
+            # Si el usuario no es admin, obtener el nombre del cliente desde el usuario actual
+            nombre_cliente = request.user.username
+    else:
+        nombre_cliente = 'prueba'  # Valor por defecto si no está autenticado
+
+    # Obtener los demás parámetros de la URL (GET)
+    group_name = request.GET.get('group_name')
+    number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    # Realizar la consulta a la base de datos utilizando los parámetros obtenidos
+    # Suponiendo que tienes un modelo Extraccion4, puedes filtrar los datos como sea necesario
+    # Por ejemplo, se puede filtrar solo por 'nombre_cliente' o también por otros parámetros como 'estado', 'municipio', etc.
+
+    query = Extraccion4.objects.filter(cliente=nombre_cliente)
+    
+    # Si hay parámetros adicionales, agregarlos a la consulta
+    if group_name:
+        query = query.filter(group_name=group_name)
+    if number2:
+        query = query.filter(number2=number2)
+    if fecha_inicio and fecha_fin:
+        query = query.filter(fecha__range=[fecha_inicio, fecha_fin])
+
+    # Obtener los datos de la base de datos
+    datos = query.values('number2', 'group_name')
+
+    # Si no hay datos, retornar un mensaje
+    if not datos:
+        return HttpResponse("No hay datos para generar el grafo.")
+
+    # Convertir los datos a un DataFrame
+    df = pd.DataFrame(list(datos))
+
+    # Crear el grafo interactivo
+    net = Network(height="750px", width="100%", bgcolor="#222222", font_color="white")
+
+    for _, row in df.iterrows():
+        number2 = str(row['number2'])
+        group_name = str(row['group_name'])
+
+        # Añadir nodo para el número de celular con color azul
+        net.add_node(number2, label=number2, color="#fa8ba2")
+
+        # Añadir nodo para el nombre del grupo con color verde
+        net.add_node(group_name, label=group_name, color="#b08cff")
+
+        # Añadir arista entre el número y el grupo
+        net.add_edge(number2, group_name)
+
+    # Guardar el archivo HTML del grafo
+    output_path = "/tmp/grafo_interactivo.html"
+    net.save_graph(output_path)
+
+    # Leer el contenido del archivo HTML generado
+    with open(output_path, 'r') as file:
+        grafo_html = file.read()
+
+    # Devolver el grafo en el template
+    return render(request, 'grafo_interactivo.html', {'grafo_html': grafo_html})
