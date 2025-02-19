@@ -37,4 +37,5 @@ urlpatterns = [
     path('tabla_datos/', tabla_datos_view, name='tabla_datos'),
     path('insertar_mensajes/', views.insertar_mensajes_view, name='insertar_mensajes'),
     path('top_palabras/', views.top_palabras_view, name='top_palabras_view'),
+    path('generar_grafo/', views.generar_grafo_view, name='generar_grafo'),
 ]
