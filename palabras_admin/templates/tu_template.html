@@ -326,20 +326,22 @@
                 </center>
                 {% if user.is_staff %}
                 <div class="form-group">
-                    <input type="text" class="form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder="Cliente">
+                    <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder="Estado">
+                    <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder="Municipio">
+                    <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
                 </div>
                 {% endif %}
+                
                 <div class="form-group">
-                    <input type="text" class="form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder="Grupo">
+                    <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
                 </div>
-                <div class="form-group">
-                    <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Celular">
+
+                <div class="form-group"></div>
+                    <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
                 </div>
                 <div class="date-container">
                     <div class="date-input-group">
@@ -350,7 +352,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <!-- Contenedor de botones -->
             <div class="button-group">
                 <button type="submit" formaction="{% url 'nube_palabras' %}">Generar Nube de Palabras</button>
@@ -362,132 +364,109 @@
         </form>
 
         <!-- Indicador de carga --> 
-        <div class="loading">Cargando el proceso, por favor espera<span class="dots"></span></div>
+        <div class="loading">Cargando el proceso, por favor espera...</div>
 
-        <style>
-        .loading {
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
+    <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
+    {% if estados_municipios %}
+        <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
+        <div id="statesMunicipalitiesContainer" style="display: none;">
+            <ul>
+                {% for item in estados_municipios %}
+                    <li>
+                        Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
+                    </li>
+                {% empty %}
+                <center>
+                    <li>No hay estados ni municipios disponibles.</li>
+                </center>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <center>
+            <p><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
+        </center>
+    {% endif %}
+    
+    <script>
+        // Solo añadir el evento si el botón existe en el DOM
+        const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
+                // Alternar la visibilidad del contenedor
+                if (statesMunicipalitiesContainer.style.display === 'none') {
+                    statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
+                    this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
+                } else {
+                    statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
+                    this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
+                }
+            });
         }
-        
-        .dots::after {
-            content: "";
-            display: inline-block;
-            animation: dots 1.5s infinite steps(4);
+    </script>      
+
+    <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
+    {% if grupos %}
+        <button id="toggleGroupsBtn">Mostrar Grupos</button>
+        <div id="groupsContainer" style="display: none;">
+            <ul>
+                {% for item in grupos %}
+                    <li>Grupo: <b>{{ item.group_name }}</b></li>
+                {% empty %}
+                    <li>No hay grupos disponibles.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <center>
+            <p><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
+        </center>
+    {% endif %}
+
+    <script>
+        // Solo añadir el evento si el botón existe en el DOM
+        const groupsToggleButton = document.getElementById('toggleGroupsBtn');
+        if (groupsToggleButton) {
+            groupsToggleButton.addEventListener('click', function() {
+                const groupsContainer = document.getElementById('groupsContainer');
+                // Alternar la visibilidad del contenedor
+                if (groupsContainer.style.display === 'none') {
+                    groupsContainer.style.display = 'block'; // Muestra los grupos
+                    this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
+                } else {
+                    groupsContainer.style.display = 'none'; // Oculta los grupos
+                    this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
+                }
+            });
         }
+    </script>
 
-        @keyframes dots {
-            0% { content: ""; }
-            25% { content: "."; }
-            50% { content: ".."; }
-            75% { content: "..."; }
-            100% { content: ""; }
-        }
-        </style>
+    <!-- Formulario para crear usuarios nuevos -->
+    <!-- Espacio entre los formularios-->
+    <div style="margin-top: 20px;"></div>
 
-
-        <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
-        {% if estados_municipios %}
-            <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
-            <div id="statesMunicipalitiesContainer" style="display: none;">
-                <ul>
-                    {% for item in estados_municipios %}
-                        <li>
-                            Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
-                        </li>
-                    {% empty %}
-                    <center>
-                        <li>No hay estados ni municipios disponibles.</li>
-                    </center>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% else %}
-            <center>
-                <h3><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></h3>
-            </center>
-        {% endif %}
-        
-        <script>
-            // Solo añadir el evento si el botón existe en el DOM
-            const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
-            if (toggleButton) {
-                toggleButton.addEventListener('click', function() {
-                    const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
-                    // Alternar la visibilidad del contenedor
-                    if (statesMunicipalitiesContainer.style.display === 'none') {
-                        statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
-                        this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
-                    } else {
-                        statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
-                        this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
-                    }
-                });
-            }
-        </script>      
-
-        <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
-        {% if grupos %}
-            <button id="toggleGroupsBtn">Mostrar Grupos</button>
-            <div id="groupsContainer" style="display: none;">
-                <ul>
-                    {% for item in grupos %}
-                        <li>Grupo: <b>{{ item.group_name }}</b></li>
-                    {% empty %}
-                        <li>No hay grupos disponibles.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% else %}
-            <center>
-                <h3><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></h3>
-            </center>
-        {% endif %}
-
-        <script>
-            // Solo añadir el evento si el botón existe en el DOM
-            const groupsToggleButton = document.getElementById('toggleGroupsBtn');
-            if (groupsToggleButton) {
-                groupsToggleButton.addEventListener('click', function() {
-                    const groupsContainer = document.getElementById('groupsContainer');
-                    // Alternar la visibilidad del contenedor
-                    if (groupsContainer.style.display === 'none') {
-                        groupsContainer.style.display = 'block'; // Muestra los grupos
-                        this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
-                    } else {
-                        groupsContainer.style.display = 'none'; // Oculta los grupos
-                        this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
-                    }
-                });
-            }
-        </script>
-
-        <!-- Formulario para crear usuarios nuevos -->
-        <!-- Espacio entre los formularios-->
-        <div style="margin-top: 20px;"></div>
-
-        {% if user.is_staff %}
-            <center>
-            <h1>Crear nuevo usuario:</h1>
-            </center>
-            <form method="POST">
-                <div class = 'form-row'>
-                  {% csrf_token %}
-                  <a href="/admin/auth/user/add/">
-                    <button type="button">Ir al formulario de creación de usuarios</button>
-                  </a>
-            </center>
-        {% endif %}
-
-        <!-- Formulario separado para la inserción de mensajes por administradores -->
-        <!-- Espacio entre los formularios-->
-        <div style="margin-top: 20px;"></div>
-
-        {% if user.is_staff %}
-            <form method="POST">
-              <div class = 'form-row'>
+    {% if user.is_staff %}
+        <center>
+        <h1>Crear nuevo usuario:</h1>
+        </center>
+        <form method="POST">
+            <div class = 'form-row'>
                 {% csrf_token %}
+                <a href="/admin/auth/user/add/">
+                <button type="button">Ir al formulario de creación de usuarios</button>
+                </a>
+        </center>
+    {% endif %}
+                    
+    <!-- Formulario separado para la inserción de mensajes por administradores -->
+    <!-- Espacio entre los formularios-->
+    <div style="margin-top: 20px;"></div>
+        
+    {% if user.is_staff %}
+        <form method="POST">
+            <div class = 'form-row'>
+              {% csrf_token %}
                 <center>
                     <h1>Inserción de Mensajes:</h1>
                 </center>
@@ -512,17 +491,16 @@
                 <button type="submit" formaction="{% url 'insertar_mensajes' %}">Insertar Mensajes</button>
               </div>
             </form>
-         {% else %}
-            <center>
-                <h2>Utilice los filtros para delimitar los datos a visualizar en la nube de palabras o la tabla de datos.</h2>
-            </center>
+    {% else %}
+        <center>
+            <h2>Utilice los filtros para delimitar los datos a visualizar en la nube de palabras o la tabla de datos.</h2>
+        </center>
 
-        {% endif %}
+    {% endif %}
 
-
-        {% if mensaje %}
-            <p>{{ mensaje }}</p>
-        {% endif %}
+    {% if mensaje %}
+        <p>{{ mensaje }}</p>
+    {% endif %}
 
 
         <!-- Nube de Palabras -->
@@ -546,8 +524,9 @@
             <!-- Botón para descargar la imagen -->
             <a href="#" class="download-button">Descargar Nube de Palabras</a>
         </div>
-        {% endif %}        
-   
+        {% endif %}
+
+        <!-- Top 10 de palabras -->
         <center>
         <h1>Top 10 Palabras Más Frecuentes</h1>
         <table>
@@ -573,7 +552,6 @@
             <button type="submit">Consultar Top 10 Palabras</button>
         </form>
 
-        
         <!-- Tabla de datos -->
         {% if datos_tabla %}
         <div class="data-table">
@@ -581,24 +559,21 @@
             <table>
                 <thead>
                     <tr>
-                        {% if user.is_staff %}
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Municipio</th>
-                        {% endif %}
                         <th>Grupo</th>
                         <th>Número</th>
                         <th>Mensaje</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in datos_tabla %}
                     <tr>
-                        {% if user.is_staff %}
                         <td>{{ row.cliente }}</td>
                         <td>{{ row.estado }}</td>
                         <td>{{ row.municipio }}</td>
-                        {% endif %}
                         <td>{{ row.group_name }}</td>
                         <td>{{ row.number2 }}</td>
                         <td>{{ row.text_data }}</td>
@@ -608,7 +583,6 @@
             </table>
         </div>
         {% endif %}
-
     </main>
 </body>
 </html>
