@@ -321,31 +321,26 @@
         <form method="GET">
             <div class="form-row">
                 <center>
-                <h1>Bienvenido a tu nube de palabras.</h1>
-                <h2>Filtros de Búsqueda.</h2>
+                    <h1>Bienvenido a tu nube de palabras.</h1>
+                    <h2>Filtros de Búsqueda.</h2>
                 </center>
                 {% if user.is_staff %}
                 <div class="form-group">
-                    <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
+                    <input type="text" class="form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder="Cliente">
                 </div>
-
                 <div class="form-group">
-                    <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
+                    <input type="text" class="form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder="Estado">
                 </div>
-
                 <div class="form-group">
-                    <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
+                    <input type="text" class="form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder="Municipio">
                 </div>
                 {% endif %}
-
                 <div class="form-group">
-                    <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
+                    <input type="text" class="form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder="Grupo">
                 </div>
-
                 <div class="form-group">
-                    <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
+                    <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Celular">
                 </div>
-
                 <div class="date-container">
                     <div class="date-input-group">
                         <label for="fecha_inicio" class="date-label">Desde:</label>
@@ -355,18 +350,14 @@
                     </div>
                 </div>
             </div>
-
+        
             <!-- Contenedor de botones -->
             <div class="button-group">
-                <!-- Botón para generar la nube de palabras -->
                 <button type="submit" formaction="{% url 'nube_palabras' %}">Generar Nube de Palabras</button>
-
-            <!-- Espacio entre los botones -->
-            <div style="margin-top: 20px;"></div>
-
-                <!-- Botón para redirigir a la vista de tabla de datos -->
+                <div style="margin-top: 20px;"></div>
                 <button type="submit" formaction="{% url 'tabla_datos' %}">Análisis de Tabla</button>
-
+                <div style="margin-top: 20px;"></div>
+                <button type="submit" formaction="{% url 'generar_grafo' %}" class="btn btn-primary">Generar Grafo</button>
             </div>
         </form>
 
@@ -555,11 +546,10 @@
             <!-- Botón para descargar la imagen -->
             <a href="#" class="download-button">Descargar Nube de Palabras</a>
         </div>
-        {% endif %}
-
+        {% endif %}        
+   
         <center>
         <h1>Top 10 Palabras Más Frecuentes</h1>
-        </center>
         <table>
         <thead>
             <tr>
@@ -567,6 +557,7 @@
             <th>Frecuencia</th>
             </tr>
         </thead>
+        </center>
         <tbody>
             {% for palabra, frecuencia in top_palabras %}
             <tr>
