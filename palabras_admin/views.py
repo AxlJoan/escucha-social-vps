@@ -272,7 +272,7 @@ import mysql.connector
 import pandas as pd
 from django.shortcuts import render
 
-def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
+def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None, fecha_inicio=None, fecha_fin=None):
     conn = mysql.connector.connect(
         host='158.69.26.160',
         user='admin',
@@ -283,7 +283,7 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
     cursor = conn.cursor()
 
     # Construir el query base
-    query = "SELECT cliente, estado, municipio, group_name, number2, text_data FROM extraccion4 WHERE 1=1"
+    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
     params = []
 
     # Agregar filtros opcionales
@@ -307,6 +307,15 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
         query += " AND LOWER(number2) LIKE LOWER(%s)"
         params.append(f"%{number2}%")
 
+    # Filtrar por fecha (si ambos valores están presentes)
+    if fecha_inicio:
+        query += " AND timestamp >= %s"
+        params.append(fecha_inicio)
+    
+    if fecha_fin:
+        query += " AND timestamp <= %s"
+        params.append(fecha_fin)
+
     # Ejecutar el query con los parámetros
     cursor.execute(query, tuple(params))
     results = cursor.fetchall()
@@ -327,8 +336,6 @@ def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, grou
     print(df.head())
     return df
 
-
-
 # Procesar datos
 import re
 from nltk.corpus import stopwords
@@ -338,8 +345,8 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name,)
+def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
 
     # Asegúrate de descargar las stopwords
     import nltk
@@ -443,12 +450,14 @@ def nube_palabras_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     # Obtener estados y municipios distintos
     estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
 
     # Genera la nube de palabras usando el nombre de cliente proporcionado
-    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2)
+    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
 
     # Verifica si la imagen de la nube de palabras está vacía (significa que no hay datos)
     if imagen_nube is None or not imagen_nube.strip():
@@ -461,6 +470,8 @@ def nube_palabras_view(request):
         'municipio': municipio,
         'group_name': group_name,
         'number2': number2,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
         'grupos': grupos,
     })
@@ -484,6 +495,8 @@ def tabla_datos_view(request):
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     # Obtener estados y municipios distintos
     estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
@@ -499,7 +512,7 @@ def tabla_datos_view(request):
     cursor = conn.cursor()
 
     # Construir el query base
-    query = "SELECT * FROM extraccion4 WHERE 1=1"
+    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
     params = []
 
     # Agregar filtros opcionales
@@ -522,6 +535,15 @@ def tabla_datos_view(request):
     if number2:
         query += " AND LOWER(number2) LIKE LOWER(%s)"
         params.append(f"%{number2}%")
+
+    # Filtrar por fecha (si ambos valores están presentes)
+    if fecha_inicio:
+        query += " AND timestamp >= %s"
+        params.append(fecha_inicio)
+    
+    if fecha_fin:
+        query += " AND timestamp <= %s"
+        params.append(fecha_fin)
 
     # Ejecutar el query con los parámetros
     cursor.execute(query, tuple(params))
@@ -552,6 +574,8 @@ def tabla_datos_view(request):
         'municipio': municipio,
         'group_name': group_name,
         'number2': number2,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
         'estados_municipios': estados_municipios,
         'grupos': grupos,
     })
@@ -715,10 +739,7 @@ def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2,
     # Obtener el top 10 de palabras más repetidas
     top_palabras = frecuencias.most_common(10)
 
-    # Llamar a la función de análisis de sentimientos
-    score, semaforo = analizar_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    return top_palabras, score, semaforo
+    return top_palabras
 
 def top_palabras_view(request):
     if request.user.is_authenticated:
@@ -737,12 +758,10 @@ def top_palabras_view(request):
     fecha_fin = request.GET.get('fecha_fin')
 
     # Generar el top 10 de palabras
-    top_palabras, sentiment_percent, sentiment_color = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    top_palabras = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
 
     return render(request, 'tu_template.html', {
-        'top_palabras': top_palabras,
-        'sentiment_percent': sentiment_percent,  
-        'sentiment_color': sentiment_color,
+        'top_palabras': top_palabras
     })
 #--------------------------------------------------------------------------------    
 import matplotlib
