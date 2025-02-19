@@ -29,3 +29,4 @@ sqlparse==0.5.0
 tqdm==4.66.5
 tzdata==2024.1
 wordcloud==1.9.3
+pyvis
