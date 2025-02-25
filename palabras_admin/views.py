@@ -444,7 +444,7 @@ def nube_palabras_view(request):
         else:
             nombre_cliente = request.user.username  # Usa su nombre de usuario
     else:
-        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
+        nombre_cliente = 'Ventas'  # O un valor predeterminado si no está autenticado
 
     estado = request.GET.get('estado')
     municipio = request.GET.get('municipio')
@@ -452,8 +452,6 @@ def nube_palabras_view(request):
     number2 = request.GET.get('number2')
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
-    # Obtener estados y municipios distintos
-    estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
 
     # Genera la nube de palabras usando el nombre de cliente proporcionado
@@ -472,7 +470,6 @@ def nube_palabras_view(request):
         'number2': number2,
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
-        'estados_municipios': estados_municipios,
         'grupos': grupos,
     })
 
@@ -489,7 +486,7 @@ def tabla_datos_view(request):
         else:
             nombre_cliente = request.user.username  # Usa su nombre de usuario
     else:
-        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
+        nombre_cliente = 'Ventas'  # O un valor predeterminado si no está autenticado
 
     estado = request.GET.get('estado')
     municipio = request.GET.get('municipio')
@@ -497,8 +494,6 @@ def tabla_datos_view(request):
     number2 = request.GET.get('number2')
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
-    # Obtener estados y municipios distintos
-    estados_municipios = obtener_estados_municipios_distintos(nombre_cliente)
     grupos = obtener_grupos(nombre_cliente)
 
     # Conectar a la base de datos
@@ -576,7 +571,6 @@ def tabla_datos_view(request):
         'number2': number2,
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
-        'estados_municipios': estados_municipios,
         'grupos': grupos,
     })
 
@@ -626,34 +620,6 @@ def insertar_mensajes_view(request):
                 conn.close()
 
     return render(request, 'tu_template.html', {'mensaje': mensaje})
-
-def obtener_estados_municipios_distintos(nombre_cliente):
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='S3gur1d4d2025',
-        database='data_wa'
-    )
-    
-    cursor = conn.cursor()
-
-    # Consulta para obtener estados y municipios distintos
-    query = """
-        SELECT DISTINCT estado, municipio
-        FROM extraccion4 
-        WHERE LOWER(cliente) = LOWER(%s)
-    """
-    
-    cursor.execute(query, (nombre_cliente,))
-    resultados = cursor.fetchall()
-
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
-
-    # Convertir resultados en un diccionario
-    estados_municipios = [{"estado": row[0], "municipio": row[1]} for row in resultados]
-    return estados_municipios
 
 def obtener_grupos(nombre_cliente):
     conn = mysql.connector.connect(
