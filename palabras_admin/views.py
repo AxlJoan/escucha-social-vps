@@ -164,7 +164,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect('nube_admin')  # Redirecciona a donde quieras después del login
+            return redirect('nube_palabras')  # Redirecciona a donde quieras después del login
     return render(request, 'login.html')  # Asegúrate de tener esta plantilla
 
 
