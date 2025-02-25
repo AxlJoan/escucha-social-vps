@@ -364,47 +364,29 @@
         </form>
 
         <!-- Indicador de carga --> 
-        <div class="loading">Cargando el proceso, por favor espera...</div>
+        <div class="loading">Cargando el proceso, por favor espera<span class="dots"></span></div>
 
-    <!-- Botón para mostrar estados y municipios disponibles para utilizar en el filtro de búsqueda del cliente --> 
-    {% if estados_municipios %}
-        <button id="toggleStatesMunicipalitiesBtn">Mostrar Estados y Municipios</button>
-        <div id="statesMunicipalitiesContainer" style="display: none;">
-            <ul>
-                {% for item in estados_municipios %}
-                    <li>
-                        Estado: <b>{{ item.estado }}</b> - Municipio: <b>{{ item.municipio }}</b>
-                    </li>
-                {% empty %}
-                <center>
-                    <li>No hay estados ni municipios disponibles.</li>
-                </center>
-                {% endfor %}
-            </ul>
-        </div>
-    {% else %}
-        <center>
-            <p><b>Para visualizar sus Estados y Municipios disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
-        </center>
-    {% endif %}
-    
-    <script>
-        // Solo añadir el evento si el botón existe en el DOM
-        const toggleButton = document.getElementById('toggleStatesMunicipalitiesBtn');
-        if (toggleButton) {
-            toggleButton.addEventListener('click', function() {
-                const statesMunicipalitiesContainer = document.getElementById('statesMunicipalitiesContainer');
-                // Alternar la visibilidad del contenedor
-                if (statesMunicipalitiesContainer.style.display === 'none') {
-                    statesMunicipalitiesContainer.style.display = 'block'; // Muestra los estados y municipios
-                    this.textContent = 'Ocultar Estados y Municipios'; // Cambia el texto del botón
-                } else {
-                    statesMunicipalitiesContainer.style.display = 'none'; // Oculta los estados y municipios
-                    this.textContent = 'Mostrar Estados y Municipios'; // Cambia el texto del botón
-                }
-            });
+        <style>
+        .loading {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
         }
-    </script>      
+        
+        .dots::after {
+            content: "";
+            display: inline-block;
+            animation: dots 1.5s infinite steps(4);
+        }
+
+        @keyframes dots {
+            0% { content: ""; }
+            25% { content: "."; }
+            50% { content: ".."; }
+            75% { content: "..."; }
+            100% { content: ""; }
+        }
+        </style>  
 
     <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
     {% if grupos %}
