@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-iy$plyxm-d*zu$y0k1toqyc&+-&n*3l=bp5@=obrk2k*fst!fp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "nube-palabras.zapto.org", "escuchasocial.zapto.org", "216.225.196.110", "187.190.174.234", "escucha-social.onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "216.225.196.110"]
 
 
 # Application definition
@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django_filters',
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE = [  
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
@@ -137,7 +138,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
