@@ -186,6 +186,10 @@ def generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin):
     df = obtener_datos_cliente(nombre_cliente, None, None, group_name, number2, fecha_inicio, fecha_fin)
     if df is None or df.empty:
         return ""
+
+    # Limitar a los primeros 100 registros
+    df = df.head(100)
+    
     from pyvis.network import Network
     net = Network(height="400px", width="100%", bgcolor="white", font_color="black")
     for _, row in df.iterrows():
