@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-iy$plyxm-d*zu$y0k1toqyc&+-&n*3l=bp5@=obrk2k*fst!fp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "216.225.196.110", "escucha-social-whatsapp.onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "216.225.196.110", "escuchasocialwhatsapp.onrender.com"]
 
 
 # Application definition
