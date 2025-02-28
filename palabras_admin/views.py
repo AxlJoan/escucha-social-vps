@@ -164,7 +164,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect('nube_palabras')  # Redirecciona a donde quieras después del login
+            return redirect('dashboard')  # Redirecciona a donde quieras después del login
     return render(request, 'login.html')  # Asegúrate de tener esta plantilla
 
 
@@ -266,202 +266,143 @@ class PalabraCompartidaUpdateView(UpdateView):
     success_url = reverse_lazy('palabra-list')
 
 # ----------------------------- A partir de aquí inicia mi código ------------------------
-
-# Conectar a la base de datos
+from django.shortcuts import render
+from django.http import HttpResponseForbidden
 import mysql.connector
-import pandas as pd
-from django.shortcuts import render
+from .utils import (
+    obtener_datos_cliente,
+    obtener_grupos,
+    generar_top_palabras,
+    generar_nube_palabras,
+    obtener_mensajes_totales,
+    obtener_numeros_totales,
+    obtener_grupos_extraidos,
+    generar_grafo,
+    generar_analisis_sentimientos
+)
+from django.core.paginator import Paginator
 
-def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None, fecha_inicio=None, fecha_fin=None):
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='S3gur1d4d2025',
-        database='data_wa'
-    )
-    
-    cursor = conn.cursor()
-
-    # Construir el query base
-    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
-    params = []
-
-    # Agregar filtros opcionales
-    if nombre_cliente:
-        query += " AND LOWER(cliente) LIKE LOWER(%s)"
-        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
-
-    if estado:
-        query += " AND LOWER(estado) LIKE LOWER(%s)"
-        params.append(f"%{estado}%")
-
-    if municipio:
-        query += " AND LOWER(municipio) LIKE LOWER(%s)"
-        params.append(f"%{municipio}%")
-
-    if group_name:
-        query += " AND LOWER(group_name) LIKE LOWER(%s)"
-        params.append(f"%{group_name}%")
-    
-    if number2:
-        query += " AND LOWER(number2) LIKE LOWER(%s)"
-        params.append(f"%{number2}%")
-
-    # Filtrar por fecha (si ambos valores están presentes)
-    if fecha_inicio:
-        query += " AND timestamp >= %s"
-        params.append(fecha_inicio)
-    
-    if fecha_fin:
-        query += " AND timestamp <= %s"
-        params.append(fecha_fin)
-
-    # Ejecutar el query con los parámetros
-    cursor.execute(query, tuple(params))
-    results = cursor.fetchall()
-
-    # Verificar si hay resultados
-    if not results:
-        cursor.close()
-        conn.close()
-        return None  # Devuelve None si no hay resultados
-
-    # Crear un DataFrame
-    df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
-
-    print(df.head())
-    return df
-
-# Procesar datos
-import re
-from nltk.corpus import stopwords
-from collections import Counter
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    # Asegúrate de descargar las stopwords
-    import nltk
-    nltk.download('stopwords')
-    
-    # Obtener stopwords en español
-    stop_words = set(stopwords.words('spanish'))
-    # Agregar stopwords personalizadas
-    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 
-    'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
-    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 
-    'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
-    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 
-    'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
-    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 
-    'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
-    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 
-    'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
-    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 
-    'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
-    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 
-    'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
-    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos',
-    'días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
-    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 
-    'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
-    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 
-    'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
-    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 
-    'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 
-    'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
-    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 
-    'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
-    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 
-    'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
-    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 
-    'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
-    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 
-    'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
-    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 
-    'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
-    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 
-    'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
-    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 
-    'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
-    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 
-    'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
-    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 
-    'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
-    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 
-    'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
-    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 
-    'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
-    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 
-    'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
-    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 
-    'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
-    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 
-    'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
-    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 
-    'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
-    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena',
-    'm', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
-
-    # Combinar todos los textos en una sola cadena
-    texto_combinado = ' '.join(df['text_data'].dropna())
-
-    # Preprocesar el texto
-    palabras = re.findall(r'\w+', texto_combinado.lower())
-    palabras_filtradas = [palabra for palabra in palabras if palabra not in stop_words and not palabra.isdigit()]
-
-    # Contar las frecuencias de palabras
-    frecuencias = Counter(palabras_filtradas)
-
-    # Generar la nube de palabras
-    nube_palabras = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(frecuencias)
-
-    # Convertir la nube de palabras a imagen en base64 para renderizar en el template
-    buffer = BytesIO()
-    nube_palabras.to_image().save(buffer, format='PNG')
-    buffer.seek(0)
-    imagen_nube = base64.b64encode(buffer.read()).decode('utf-8')
-
-    return imagen_nube
-
-# Crear la vista para renderizar la nube
-from django.contrib import messages
-from django.shortcuts import render
-
-def nube_palabras_view(request):
+def dashboard_view(request):
+    # Extraer filtros
     if request.user.is_authenticated:
-        if request.user.is_staff:  # Verifica si el usuario es un admin
-            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
-        else:
-            nombre_cliente = request.user.username  # Usa su nombre de usuario
+        nombre_cliente = request.GET.get('cliente', '') if request.user.is_staff else request.user.username
     else:
-        nombre_cliente = 'Ventas'  # O un valor predeterminado si no está autenticado
+        nombre_cliente = 'Ventas'
+    
+    estado = request.GET.get('estado', '')
+    municipio = request.GET.get('municipio', '')
+    group_name = request.GET.get('group_name', '')
+    number2 = request.GET.get('number2', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+    
+    # Obtener datos utilizando las funciones auxiliares
+    top_palabras = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    if df is not None:
+        datos_tabla = df.to_dict(orient='records')
+    else:
+        datos_tabla = []
+    
+    # Obtener grupos
+    grupos = obtener_grupos(nombre_cliente)
+    
+    # Generar grafo
+    grafo_html = generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin)
 
+    # Nuevas métricas
+    mensajes_totales = obtener_mensajes_totales(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    numeros_totales = obtener_numeros_totales(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    grupos_extraidos = obtener_grupos_extraidos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    analisis_sentimientos = generar_analisis_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    
+    if analisis_sentimientos:
+        key = max(analisis_sentimientos, key=analisis_sentimientos.get)
+        sentimiento_predominante = key
+    else:
+        sentimiento_predominante = "Sin datos"
+ 
+    context = {
+        'nombre_cliente': nombre_cliente,
+        'estado': estado,
+        'municipio': municipio,
+        'group_name': group_name,
+        'number2': number2,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
+        'top_palabras': top_palabras,
+        'imagen_nube': imagen_nube,
+        'datos_tabla': datos_tabla,
+        'grupos': grupos,
+        'mensajes_totales': mensajes_totales,
+        'numeros_totales': numeros_totales,
+        'grupos_extraidos': grupos_extraidos,
+        'grafo_html': grafo_html,
+        'analisis_sentimientos': analisis_sentimientos,
+        'sentimiento_predominante': sentimiento_predominante,
+    }
+    return render(request, 'tu_template.html', context)
+#-------------------------------------------------------------------------#
+def insertar_mensajes_view(request):
+    # Solo administradores pueden insertar mensajes
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+    
+    mensaje = ""
+    if request.method == 'POST':
+        text_data = request.POST.get('text_data')
+        cantidad = int(request.POST.get('cantidad', 0))
+        cliente = request.POST.get('cliente')
+        number2 = request.POST.get('number2')
+        estado = request.POST.get('estado')
+        municipio = request.POST.get('municipio')
+        group_name = request.POST.get('group_name')
+        
+        if text_data and cantidad > 0 and cliente:
+            conn = mysql.connector.connect(
+                host='158.69.26.160',
+                user='admin',
+                password='S3gur1d4d2025',
+                database='data_wa'
+            )
+            cursor = conn.cursor()
+            sql = "INSERT INTO extraccion4 (text_data, cliente, number2, estado, municipio, group_name) VALUES (%s, %s, %s, %s, %s, %s)"
+            data = [(text_data, cliente, number2, estado, municipio, group_name)] * cantidad
+            
+            try:
+                cursor.executemany(sql, data)
+                conn.commit()
+                mensaje = f"Se han insertado {cantidad} mensajes para el cliente '{cliente}'."
+            except Exception as e:
+                mensaje = f"Ocurrió un error: {str(e)}"
+            finally:
+                cursor.close()
+                conn.close()
+    
+    return render(request, 'tu_template.html', {'mensaje': mensaje})
+#-------------------------------------------------------------------------#
+from django.shortcuts import render
+from .utils import generar_nube_palabras, obtener_datos_cliente
+
+def nube_completa_view(request):
+    # Extraer filtros de la request
+    if request.user.is_authenticated:
+        nombre_cliente = request.GET.get('cliente') if request.user.is_staff else request.user.username
+    else:
+        nombre_cliente = 'Ventas'
     estado = request.GET.get('estado')
     municipio = request.GET.get('municipio')
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
-    grupos = obtener_grupos(nombre_cliente)
-
-    # Genera la nube de palabras usando el nombre de cliente proporcionado
+    
+    # Generar la nube de palabras (puedes ajustar los parámetros para obtener una imagen de mayor resolución)
     imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    # Verifica si la imagen de la nube de palabras está vacía (significa que no hay datos)
-    if imagen_nube is None or not imagen_nube.strip():
-        messages.warning(request, "No se encontraron datos que coincidan con la búsqueda.")
-
-    return render(request, 'tu_template.html', {
+    
+    context = {
         'imagen_nube': imagen_nube,
         'nombre_cliente': nombre_cliente,
         'estado': estado,
@@ -470,342 +411,24 @@ def nube_palabras_view(request):
         'number2': number2,
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
-        'grupos': grupos,
-    })
-
-
-from django.shortcuts import render
-import mysql.connector
-import pandas as pd
-
-# Crear vista para renderizar la tabla
-def tabla_datos_view(request):
-    if request.user.is_authenticated:
-        if request.user.is_staff:  # Verifica si el usuario es un admin
-            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
-        else:
-            nombre_cliente = request.user.username  # Usa su nombre de usuario
-    else:
-        nombre_cliente = 'Ventas'  # O un valor predeterminado si no está autenticado
-
-    estado = request.GET.get('estado')
-    municipio = request.GET.get('municipio')
-    group_name = request.GET.get('group_name')
-    number2 = request.GET.get('number2')
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-    grupos = obtener_grupos(nombre_cliente)
-
-    # Conectar a la base de datos
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='S3gur1d4d2025',
-        database='data_wa'
-    )
-    
-    cursor = conn.cursor()
-
-    # Construir el query base
-    query = "SELECT cliente, estado, municipio, group_name, number2, text_data, timestamp FROM extraccion4 WHERE 1=1"
-    params = []
-
-    # Agregar filtros opcionales
-    if nombre_cliente:
-        query += " AND LOWER(cliente) LIKE LOWER(%s)"
-        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
-
-    if estado:
-        query += " AND LOWER(estado) LIKE LOWER(%s)"
-        params.append(f"%{estado}%")
-
-    if municipio:
-        query += " AND LOWER(municipio) LIKE LOWER(%s)"
-        params.append(f"%{municipio}%")
-
-    if group_name:
-        query += " AND LOWER(group_name) LIKE LOWER(%s)"
-        params.append(f"%{group_name}%")
-
-    if number2:
-        query += " AND LOWER(number2) LIKE LOWER(%s)"
-        params.append(f"%{number2}%")
-
-    # Filtrar por fecha (si ambos valores están presentes)
-    if fecha_inicio:
-        query += " AND timestamp >= %s"
-        params.append(fecha_inicio)
-    
-    if fecha_fin:
-        query += " AND timestamp <= %s"
-        params.append(fecha_fin)
-
-    # Ejecutar el query con los parámetros
-    cursor.execute(query, tuple(params))
-    results = cursor.fetchall()
-
-    # Crear un DataFrame si hay resultados
-    if results:
-        df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-        # Convertir DataFrame a lista de diccionarios
-        datos_tabla = df.to_dict(orient='records')
-    else:
-        datos_tabla = []  # Cambiar a lista vacía si no hay resultados
-
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
-
-    # Paginación
-    paginator = Paginator(datos_tabla, 100)  # Mostrar 100 registros por página
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Renderizar la plantilla con los datos
-    return render(request, 'tu_template.html', {
-        'datos_tabla': datos_tabla,
-        'nombre_cliente': nombre_cliente,
-        'estado': estado,
-        'municipio': municipio,
-        'group_name': group_name,
-        'number2': number2,
-        'fecha_inicio': fecha_inicio,
-        'fecha_fin': fecha_fin,
-        'grupos': grupos,
-    })
-
-# Función para insertar mensajes como administrador a la base de datos "data_wa"
-from django.http import HttpResponseForbidden
-
-from django.http import HttpResponseForbidden
-import mysql.connector
-
-def insertar_mensajes_view(request):    
-    # Verificar si el usuario es un administrador
-    if not request.user.is_staff:
-        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
-
-    if request.method == 'POST':
-        text_data = request.POST.get('text_data')  # Usar el nombre adecuado
-        cantidad = int(request.POST.get('cantidad', 0))
-        cliente = request.POST.get('cliente')  # Obtener el cliente del formulario
-        number2 = request.POST.get('number2') # Obtener el número de teléfono del formulario
-        estado = request.POST.get('estado')
-        municipio = request.POST.get('municipio')
-        group_name = request.POST.get('group_name')
-
-        if text_data and cantidad > 0 and cliente:
-            # Conectar a la base de datos
-            conn = mysql.connector.connect(
-                host='158.69.26.160',
-                user='admin',
-                password='S3gur1d4d2025',
-                database='data_wa'
-            )
-            cursor = conn.cursor()
-
-            # Insertar los mensajes en la base de datos
-            sql = "INSERT INTO extraccion4 (text_data, cliente, number2, estado, municipio, group_name) VALUES (%s, %s, %s, %s, %s, %s)"
-            data = [(text_data, cliente, number2, estado, municipio, group_name)] * cantidad  # Crear una lista con el mensaje y el cliente repetido
-            
-            try:
-                cursor.executemany(sql, data)
-                conn.commit()
-                mensaje = f"Se han insertado {cantidad} mensajes con el texto '{text_data}' para el cliente '{cliente}' utilizando el siguiente número '{number2}', dentro del estado y municipio de '{estado}', '{municipio}'."
-            except Exception as e:
-                mensaje = f"Ocurrió un error: {str(e)}"
-            finally:
-                # Cerrar la conexión
-                cursor.close()
-                conn.close()
-
-    return render(request, 'tu_template.html', {'mensaje': mensaje})
-
-def obtener_grupos(nombre_cliente):
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='S3gur1d4d2025',
-        database='data_wa'
-    )
-    
-    cursor = conn.cursor()
-
-    # Consulta para obtener grupos distintos
-    query = """
-        SELECT DISTINCT group_name 
-        FROM extraccion4 
-        WHERE LOWER(cliente) = LOWER(%s)
-    """
-    
-    cursor.execute(query, (nombre_cliente,))
-    resultados = cursor.fetchall()
-
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
-
-    # Convertir resultados en un diccionario
-    grupos = [{"group_name": row[0]} for row in resultados]
-    return grupos
-
-from django.http import JsonResponse
-import mysql.connector
+    }
+    return render(request, 'nube_completa.html', context)
 #-------------------------------------------------------------------------#
-# Test de funciones nuevas 06/02/2025
-
-def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    # Obtener el dataframe filtrado
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    # Combinar todos los textos en una sola cadena
-    texto_combinado = ' '.join(df['text_data'].dropna())
-
-    # Obtener stopwords en español
-    import nltk
-    nltk.download('stopwords', quiet=True)
-    stop_words = set(stopwords.words('spanish'))
-    # Agregar stopwords personalizadas
-    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
-    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
-    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
-    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
-    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
-    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
-    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
-    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos','días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
-    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
-    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
-    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
-    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
-    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
-    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
-    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
-    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
-    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
-    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
-    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
-    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
-    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
-    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
-    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
-    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
-    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
-    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
-    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena','m', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
-
-    # Preprocesar el texto
-    palabras = re.findall(r'\w+', texto_combinado.lower())
-    palabras_filtradas = [palabra for palabra in palabras if palabra not in stop_words and not palabra.isdigit()]
-
-    # Contar las frecuencias de palabras
-    frecuencias = Counter(palabras_filtradas)
-
-    # Obtener el top 10 de palabras más repetidas
-    top_palabras = frecuencias.most_common(10)
-
-    return top_palabras
-
-def top_palabras_view(request):
+def grafo_completo_view(request):
+    # Extraer filtros según necesites:
     if request.user.is_authenticated:
-        if request.user.is_staff:
-            nombre_cliente = request.GET.get('cliente')
-        else:
-            nombre_cliente = request.user.username
+        nombre_cliente = request.GET.get('cliente') if request.user.is_staff else request.user.username
     else:
-        nombre_cliente = 'prueba'
-
-    estado = request.GET.get('estado')
-    municipio = request.GET.get('municipio')
+        nombre_cliente = 'Ventas'
     group_name = request.GET.get('group_name')
     number2 = request.GET.get('number2')
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
-
-    # Generar el top 10 de palabras
-    top_palabras = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
-
-    return render(request, 'tu_template.html', {
-        'top_palabras': top_palabras
-    })
-#--------------------------------------------------------------------------------    
-import matplotlib
-matplotlib.use('Agg')
-#-------------------------------------------------------------------------------------------
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-import pandas as pd
-from pyvis.network import Network
-from .models import Extraccion4  # Asegúrate de importar tu modelo correctamente
-
-@login_required
-def generar_grafo_view(request):
-    # Verificar si el usuario es autenticado
-    if request.user.is_authenticated:
-        # Si el usuario es admin, obtener el cliente desde los parámetros GET
-        if request.user.is_staff:
-            nombre_cliente = request.GET.get('cliente')
-        else:
-            # Si el usuario no es admin, obtener el nombre del cliente desde el usuario actual
-            nombre_cliente = request.user.username
-    else:
-        nombre_cliente = 'prueba'  # Valor por defecto si no está autenticado
-
-    # Obtener los demás parámetros de la URL (GET)
-    group_name = request.GET.get('group_name')
-    number2 = request.GET.get('number2')
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-
-    # Realizar la consulta a la base de datos utilizando los parámetros obtenidos
-    # Suponiendo que tienes un modelo Extraccion4, puedes filtrar los datos como sea necesario
-    # Por ejemplo, se puede filtrar solo por 'nombre_cliente' o también por otros parámetros como 'estado', 'municipio', etc.
-
-    query = Extraccion4.objects.filter(cliente=nombre_cliente)
     
-    # Si hay parámetros adicionales, agregarlos a la consulta
-    if group_name:
-        query = query.filter(group_name=group_name)
-    if number2:
-        query = query.filter(number2=number2)
-    if fecha_inicio and fecha_fin:
-        query = query.filter(fecha__range=[fecha_inicio, fecha_fin])
+    # Llamamos a la función que genera el grafo (sin usar archivos temporales)
+    grafo_html = generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin)
+    
+    context = {'grafo_html': grafo_html}
+    return render(request, 'grafo_completo.html', context)
+#-------------------------------------------------------------------------#
 
-    # Obtener los datos de la base de datos
-    datos = query.values('number2', 'group_name')
-
-    # Si no hay datos, retornar un mensaje
-    if not datos:
-        return HttpResponse("No hay datos para generar el grafo.")
-
-    # Convertir los datos a un DataFrame
-    df = pd.DataFrame(list(datos))
-
-    # Crear el grafo interactivo
-    net = Network(height="750px", width="100%", bgcolor="#222222", font_color="white")
-
-    for _, row in df.iterrows():
-        number2 = str(row['number2'])
-        group_name = str(row['group_name'])
-
-        # Añadir nodo para el número de celular con color azul
-        net.add_node(number2, label=number2, color="#fa8ba2")
-
-        # Añadir nodo para el nombre del grupo con color verde
-        net.add_node(group_name, label=group_name, color="#b08cff")
-
-        # Añadir arista entre el número y el grupo
-        net.add_edge(number2, group_name)
-
-    # Guardar el archivo HTML del grafo
-    output_path = "/tmp/grafo_interactivo.html"
-    net.save_graph(output_path)
-
-    # Leer el contenido del archivo HTML generado
-    with open(output_path, 'r') as file:
-        grafo_html = file.read()
-
-    # Devolver el grafo en el template
-    return render(request, 'grafo_interactivo.html', {'grafo_html': grafo_html})

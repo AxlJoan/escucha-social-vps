@@ -1,568 +1,417 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nube de Palabras</title>
-    <style>
-        /* Estilos generales */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <title>Escucha Social - WhatsAppc</title>
+  <style>
+    /* Reset básico */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    /* Layout */
+    .dashboard-container { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 250px; background-color: #ffffff; border-right: 1px solid #ddd; padding: 20px;
+    }
+    .sidebar h2 { font-size: 18px; margin-bottom: 20px; }
+    .sidebar ul { list-style: none; padding-left: 0; margin-bottom: 20px; }
+    .sidebar ul li {
+      margin-bottom: 10px; padding: 8px; border-radius: 4px; transition: background-color 0.2s;
+    }
+    .sidebar ul li:hover { background-color: #f2f2f2; cursor: pointer; }
+    .sidebar ul li a {
+      text-decoration: none; color: #333; display: block;
+    }
+    /* Filtros en el sidebar */
+    .sidebar form { margin-bottom: 20px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group-input {
+      width: 100%; color: #161b33; font-size: 16px; background-color: #E9E9E9;
+      border: 1px solid #E9E9E9; border-radius: 5px; height: 36px; padding-left: 10px; margin-bottom: 10px;
+    }
+    .date-container { margin: 10px 0; }
+    .date-input-group { display: flex; flex-direction: column; gap: 5px; }
+    .styled-date-input {
+      padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%;
+    }
+    .date-label { font-size: 14px; color: #555; }
+    .date-separator { font-weight: bold; font-size: 14px; color: #666; }
+    .button-group { margin-top: 10px; }
+    .button-group button {
+      width: 100%; font-size: 16px; border-radius: 4px; color: #fff; height: 36px; cursor: pointer;
+      background: #3d5a80; border: none; transition: 0.3s;
+    }
+    .button-group button:hover { opacity: 0.9; }
+    /* Contenido principal */
+    .main-content { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-x: auto; }
+    /* Tarjetas superiores (Métricas) */
+    .top-metrics { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+    .metric-card {
+      background-color: #fff; flex: 1; min-width: 180px; border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; text-align: center;
+    }
+    .metric-card h3 { font-size: 14px; margin-bottom: 10px; color: #666; }
+    .metric-card p { font-size: 24px; font-weight: bold; }
+    /* Sección de gráficos */
+    .charts-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+    .chart-container {
+      background-color: #fff; flex: 1; min-width: 300px; border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px;
+    }
+    .chart-container h4 { margin-bottom: 10px; font-size: 16px; color: #333; }
+    /* Sección inferior */
+    .bottom-row { display: flex; flex-wrap: wrap; gap: 20px; }
+    .bottom-item {
+      background-color: #fff; flex: 1; min-width: 300px; border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px;
+    }
+    .bottom-item img {
+      background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: block; margin: 0 auto; max-width: 100%; height: auto;
+    }
+    .bottom-item h4 { margin-bottom: 10px; font-size: 16px; color: #333; }
+    /* Tabla de datos */
+    .data-table {
+      width: 100%; border-collapse: collapse; margin-top: 20px;
+      word-break: break-word; white-space: normal;
+    }
+    .data-table th, .data-table td {
+      padding: 10px; text-align: left; border-bottom: 1px solid #ddd;
+    }
+    .data-table th { background-color: #f5f5f5; }
+    /* Agregamos clase para columnas de admin para más padding */
+    .pad-col {
+      padding: 15px !important;
+    }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f0f4f8;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
+    /* Aplica a las celdas <th> y <td> con la clase group-col */
+    .data-table th.group-col,
+    .data-table td.group-col {
+    min-width: 150px; /* Ajusta a tu preferencia */
+    }
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-top: 20px;
-            font-size: 2.5rem;
-            font-weight: 300;
-        }
+    /* Aplica a las celdas <th> y <td> con la clase number-col */
+    .data-table th.number-col,
+    .data-table td.number-col {
+    min-width: 150px; /* Ajusta a tu preferencia */
+    }
 
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #161b33;
-            padding: 10px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
+    /* Formulario para insertar mensajes (solo admin) */
+    .admin-form {
+      background-color: #fff; border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; margin-top: 20px;
+    }
+    .admin-form input[type="text"],
+    .admin-form input[type="number"] {
+      width: 100%; margin-bottom: 10px; padding: 8px;
+      border-radius: 4px; border: 1px solid #ddd;
+    }
+    .admin-form button {
+      background-color: #3d5a80; color: #fff; border: none;
+      border-radius: 4px; padding: 10px 15px; cursor: pointer;
+    }
+    .admin-form button:hover { opacity: 0.9; }
 
-        nav h1 {
-            color: #fff;
-            text-align: center;
-            margin: 0;
-        }
+    /* Espaciados */
+    .mt-20 { margin-top: 20px; }
 
-        main {
-            margin-top: 80px;
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-            
-        }
-
-        .form-row {
-            width: 100%;
-            margin: 0 auto;
-            align-items: center;
-        }
-
-        .form-group {
-            width: 100%;
-            font-family: "Arial", Times, serif;
-        }
-
-        label {
-            font-weight: bold;
-            color: #555;
-            margin-right: 10px;
-        }
-
-        .form-group-input[type="text"] {
-          width: 100%;
-          color: #161b33;
-          font-size: 18px;
-          background-color: #E9E9E9;
-          border: 1px solid #E9E9E9;
-          -moz-border-radius: 5px;
-          -webkit-border-radius: 5px;
-          border-radius: 5px;
-          height: 40px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ccc;
-          border-left: 1px solid #ccc;
-          text-indent: 20px;
-        }
-
-        .form-group-input[type="password"] {
-          width: 100%;
-          color: #161b33;
-          font-size: 18px;
-          background-color: #E9E9E9;
-          border: 1px solid #E9E9E9;
-          -moz-border-radius: 5px;
-          -webkit-border-radius: 5px;
-          border-radius: 5px;
-          height: 40px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ccc;
-          border-left: 1px solid #ccc;
-          text-indent: 20px;
-        }
-
-        .form-group-input[type="email"] {
-          width: 100%;
-          color: #161b33;
-          font-size: 18px;
-          background-color: #E9E9E9;
-          border: 1px solid #E9E9E9;
-          -moz-border-radius: 5px;
-          -webkit-border-radius: 5px;
-          border-radius: 5px;
-          height: 40px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ccc;
-          border-left: 1px solid #ccc;
-          text-indent: 20px;
-        }
-
-        .form-group-number[type="number"] {
-          width: 100%;
-          color: #292929;
-          font-size: 18px;
-          background-color: #E9E9E9;
-          border: 1px solid #E9E9E9;
-          -moz-border-radius: 5px;
-          -webkit-border-radius: 5px;
-          border-radius: 5px;
-          height: 40px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ccc;
-          border-left: 1px solid #ccc;
-          text-indent: 20px;
-        }
-
-        button {
-          width: 100%;
-          font-size: 18px;
-          border-radius: 4px;
-          color: #fff;
-          height: 40px;
-          opacity: .8;
-          margin-bottom: 20px;
-          cursor: pointer;
-          background: #3d5a80;
-          display: block;
-          border: none;
-          border-bottom: 1px solid #293241;
-          border-right: 1px solid #293241;
-          transition: 1s;
-        }
-
-        button:hover {
-            opacity: 1;
-        }
-
-
-        .nube-container {
-            margin-top: 40px;
-            text-align: center;
-            align-items: center;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        .nube-container img {
-            max-width: 100%;
-            height: auto;
-            object-fit: contain;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-        }
-
-        .download-button {
-            width: 100%;
-          font-size: 18px;
-          border-radius: 4px;
-          color: #fff;
-          height: 40px;
-          opacity: .8;
-          margin-bottom: 20px;
-          cursor: pointer;
-          background: #3d5a80;
-          display: block;
-          border: none;
-          border-bottom: 1px solid #293241;
-          border-right: 1px solid #293241;
-          transition: 1s;
-        }
-
-        .download-button:hover {
-            opacity: 1;
-        }
-
-        .data-table {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 90%;
-            border-collapse: collapse;
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #617998;
-            color: white;
-        }
-
-        .date-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;     
-        }
-
-        .date-input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .styled-date-input {
-            padding: 10px;
-            border: 2px solid #c4c4c4;
-            border-radius: 8px;
-            font-size: 14px;
-            width: 160px;
-            transition: all 0.3s ease;
-        }
-
-        .styled-date-input:focus {
-            outline: none;
-            border-color: #007BFF;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-        }
-
-        .date-separator {
-            font-weight: bold;
-            font-size: 18px;
-            color: #666;
-        }
-
-        .loading {
-            display: none;
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: 20px;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-    </style>
-
-
-    <script>
-        window.onload = function() {
-            const form = document.querySelector('form');
-            const loadingMessage = document.querySelector('.loading');
-            const downloadButton = document.querySelector('.download-button');
-
-            form.addEventListener('submit', function() {
-                loadingMessage.style.display = 'block';
-            });
-
-            if (downloadButton) {
-                downloadButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const img = document.querySelector('.nube-container img');
-                    const link = document.createElement('a');
-                    link.href = img.src;
-                    link.download = 'nube_de_palabras.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            }
-        }
-    </script>
+    /* Media queries para responsividad */
+    @media (max-width: 768px) {
+      .dashboard-container { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #ddd; }
+      .main-content { padding: 10px; }
+    }
+  </style>
+  <!-- Incluir Chart.js para la gráfica del Top 10 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Barra de navegación -->
-    <nav>
-        <h1>Nube de Palabras</h1>
-    </nav>
-
-    <!-- Contenedor principal -->
-    <main>
-
-        <!-- Formulario único para ambos procesos -->
-        <form method="GET">
-            <div class="form-row">
-                <center>
-                    <h1>Bienvenido a tu nube de palabras.</h1>
-                    <h2>Filtros de Búsqueda.</h2>
-                </center>
-                {% if user.is_staff %}
-                <div class="form-group">
-                    <input type="text" class = "form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder = Cliente>
-                </div>
-                <div class="form-group">
-                    <input type="text" class = "form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder = Estado>
-                </div>
-                <div class="form-group">
-                    <input type="text" class = "form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder = Municipio>
-                </div>
-                {% endif %}
-                
-                <div class="form-group">
-                    <input type="text" class = "form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder = Grupo>
-                </div>
-
-                <div class="form-group"></div>
-                    <input type="text" class = "form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder = Celular />
-                </div>
-                <div class="date-container">
-                    <div class="date-input-group">
-                        <label for="fecha_inicio" class="date-label">Desde:</label>
-                        <input type="date" class="styled-date-input" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
-                        <span class="date-separator">Hasta:</span>
-                        <input type="date" class="styled-date-input" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contenedor de botones -->
-            <div class="button-group">
-                <button type="submit" formaction="{% url 'nube_palabras' %}">Generar Nube de Palabras</button>
-                <div style="margin-top: 20px;"></div>
-                <button type="submit" formaction="{% url 'tabla_datos' %}">Análisis de Tabla</button>
-                <div style="margin-top: 20px;"></div>
-                <button type="submit" formaction="{% url 'generar_grafo' %}" class="btn btn-primary">Generar Grafo</button>
-            </div>
-        </form>
-
-        <!-- Indicador de carga --> 
-        <div class="loading">Cargando el proceso, por favor espera<span class="dots"></span></div>
-
-        <style>
-        .loading {
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .dots::after {
-            content: "";
-            display: inline-block;
-            animation: dots 1.5s infinite steps(4);
-        }
-
-        @keyframes dots {
-            0% { content: ""; }
-            25% { content: "."; }
-            50% { content: ".."; }
-            75% { content: "..."; }
-            100% { content: ""; }
-        }
-        </style>  
-
-    <!-- Botón para mostrar grupos disponibles para utilizar en el filtro de búsqueda del cliente -->
-    {% if grupos %}
-        <button id="toggleGroupsBtn">Mostrar Grupos</button>
-        <div id="groupsContainer" style="display: none;">
-            <ul>
-                {% for item in grupos %}
-                    <li>Grupo: <b>{{ item.group_name }}</b></li>
-                {% empty %}
-                    <li>No hay grupos disponibles.</li>
-                {% endfor %}
-            </ul>
+  <div class="dashboard-container">
+    <!-- Barra lateral -->
+    <div class="sidebar">
+      <h2>Escucha Social WhatsApp</h2>
+      <ul>
+        <!-- Menú principal con links a vistas (podrías usar <button> con formaction si prefieres) -->
+        <li><a href="{% url 'nube_completa' %}">Nube de Palabras</a></li>
+        <li><a href="{% url 'tabla_datos' %}">Tabla de Datos</a></li>
+        <li><a href="{% url 'grafo_completo' %}">Grafo</a></li>
+        <li><a href="{% url 'login' %}">Cerrar Sesión</a></li>
+      </ul>
+      <h2>Filtros de Búsqueda</h2>
+      <form method="GET" action="{% url 'dashboard' %}">
+        {% if user.is_staff %}
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder="Cliente">
         </div>
-    {% else %}
-        <center>
-            <p><b>Para visualizar sus Grupos disponibles primero genere una nube de palabras o una tabla de anális.</b></p>
-        </center>
-    {% endif %}
-
-    <script>
-        // Solo añadir el evento si el botón existe en el DOM
-        const groupsToggleButton = document.getElementById('toggleGroupsBtn');
-        if (groupsToggleButton) {
-            groupsToggleButton.addEventListener('click', function() {
-                const groupsContainer = document.getElementById('groupsContainer');
-                // Alternar la visibilidad del contenedor
-                if (groupsContainer.style.display === 'none') {
-                    groupsContainer.style.display = 'block'; // Muestra los grupos
-                    this.textContent = 'Ocultar Grupos'; // Cambia el texto del botón
-                } else {
-                    groupsContainer.style.display = 'none'; // Oculta los grupos
-                    this.textContent = 'Mostrar Grupos'; // Cambia el texto del botón
-                }
-            });
-        }
-    </script>
-
-    <!-- Formulario para crear usuarios nuevos -->
-    <!-- Espacio entre los formularios-->
-    <div style="margin-top: 20px;"></div>
-
-    {% if user.is_staff %}
-        <center>
-        <h1>Crear nuevo usuario:</h1>
-        </center>
-        <form method="POST">
-            <div class = 'form-row'>
-                {% csrf_token %}
-                <a href="/admin/auth/user/add/">
-                <button type="button">Ir al formulario de creación de usuarios</button>
-                </a>
-        </center>
-    {% endif %}
-                    
-    <!-- Formulario separado para la inserción de mensajes por administradores -->
-    <!-- Espacio entre los formularios-->
-    <div style="margin-top: 20px;"></div>
-        
-    {% if user.is_staff %}
-        <form method="POST">
-            <div class = 'form-row'>
-              {% csrf_token %}
-                <center>
-                    <h1>Inserción de Mensajes:</h1>
-                </center>
-                <input type="text" class = "form-group-input" id="cliente" name="cliente" placeholder = Cliente required>
-            
-                <input type="text" class = "form-group-input" id="text_data" name="text_data" placeholder = 'Añadir Mensaje' required>
-
-                <input type="text" class = "form-group-input" id="number2" name="number2" placeholder = Celular required>
-
-                <input type="text" class = "form-group-input" id="estado" name="estado" placeholder = Estado required>
-
-                <input type="text" class = "form-group-input" id="municipio" name="municipio" placeholder = Municipio required>
-
-                <input type="text" class = "form-group-input" id="group_name" name="group_name" placeholder = Grupo>
-            
-                <center><label for="cantidad">Cantidad de mensajes a añadir:</label></center>
-                <input type="number" class = "form-group-number" id="cantidad" name="cantidad" min="1" required>
-
-                <!-- Espacio entre los botones -->
-                <div style="margin-top: 20px;"></div>
-            
-                <button type="submit" formaction="{% url 'insertar_mensajes' %}">Insertar Mensajes</button>
-              </div>
-            </form>
-    {% else %}
-        <center>
-            <h2>Utilice los filtros para delimitar los datos a visualizar en la nube de palabras o la tabla de datos.</h2>
-        </center>
-
-    {% endif %}
-
-    {% if mensaje %}
-        <p>{{ mensaje }}</p>
-    {% endif %}
-
-
-        <!-- Nube de Palabras -->
-        {% if imagen_nube %}
-        <div class="nube-container">
-            <h2>Nube de Palabras</h2>
-            {% if group_name %}
-                <p>Grupo: {{ group_name }}</p>
-            {% endif %}
-            {% if number2 %}
-                <p>Número de celular: {{ number2 }}</p>
-            {% endif %}
-            <img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
-
-            <!-- Botón para descargar la imagen -->
-            <a href="#" class="download-button">Descargar Nube de Palabras</a>
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder="Estado">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder="Municipio">
         </div>
         {% endif %}
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder="Grupo">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Celular">
+        </div>
+        <div class="date-container">
+          <div class="date-input-group">
+            <label for="fecha_inicio" class="date-label">Desde:</label>
+            <input type="date" class="styled-date-input" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            <span class="date-separator">Hasta:</span>
+            <input type="date" class="styled-date-input" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+          </div>
+        </div>
+        <div class="button-group">
+          <button type="submit">Aplicar Filtros</button>
+        </div>
+      </form>
 
-        <!-- Top 10 de palabras -->
-        <center>
-        <h1>Top 10 Palabras Más Frecuentes</h1>
-        <table>
-        <thead>
+      <!-- Si es administrador, mostrar enlace para crear usuarios -->
+      {% if user.is_staff %}
+      <h2>Administración</h2>
+      <ul>
+        <li><a href="/admin/auth/user/add/">Crear Usuarios</a></li>
+      </ul>
+      {% endif %}
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+      
+      <!-- Tarjetas superiores (Métricas de ejemplo) -->
+      <div class="top-metrics">
+        <div class="metric-card">
+          <h3>Mensajes Totales</h3>
+          <p>{{ mensajes_totales }}</p>
+        </div>
+        <div class="metric-card">
+          <h3>Números Extraídos</h3>
+          <p>{{ numeros_totales }}</p>
+        </div>
+        <div class="metric-card">
+          <h3>Grupos Extraídos</h3>
+          <p>{{ grupos_extraidos }}</p>
+        </div>
+        <div class="metric-card">
+          <h3>Análisis de Sentimientos</h3>
+          <p>{{ sentimiento_predominante }}</p>
+        </div>
+      </div>
+
+      <!-- Sección de gráficos (ejemplos) -->
+      <!-- Sección de gráficos: Top 10 Palabras en gráfica de barras -->
+      <div class="charts-row">
+        <div class="chart-container">
+          <h4>Top 10 Palabras</h4>
+          {% if top_palabras %}
+          <canvas id="topWordsChart"></canvas>
+          {% else %}
+          <p>No hay datos para mostrar.</p>
+          {% endif %}
+        </div>
+
+        <!-- Análisis de Sentimientos (Placeholder o imagen) -->
+        <div class="chart-container">
+            <h4>Análisis de Sentimientos</h4>
+            {% if analisis_sentimientos %}
+              <!-- Envolvemos el canvas en un contenedor con tamaño fijo -->
+              <div style="width:300px; height:300px; margin:0 auto;">
+                <canvas id="sentimentPieChart"></canvas>
+              </div>
+            {% else %}
+              <p>No hay datos para análisis de sentimientos.</p>
+            {% endif %}
+          </div>
+          
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              {% if analisis_sentimientos %}
+                const sentimentLabels = [];
+                const sentimentData = [];
+                {% for key, value in analisis_sentimientos.items %}
+                  sentimentLabels.push("{{ key }}");
+                  sentimentData.push({{ value }});
+                {% endfor %}
+                
+                const ctx = document.getElementById('sentimentPieChart').getContext('2d');
+                new Chart(ctx, {
+                  type: 'pie',
+                  data: {
+                    labels: sentimentLabels,
+                    datasets: [{
+                      data: sentimentData,
+                      backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(54, 162, 235, 0.6)'
+                      ],
+                      borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(54, 162, 235, 1)'
+                      ],
+                      borderWidth: 1
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                  }
+                });
+              {% endif %}
+            });
+          </script>
+
+      <!-- Sección inferior: Word Cloud y grafo -->
+      <div class="bottom-row">
+        <div class="bottom-item">
+          <h4>Nube de Palabras</h4>
+          {% if imagen_nube %}
+            <img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
+          {% else %}
+            <p>No se encontró imagen de la nube de palabras.</p>
+          {% endif %}
+        </div>
+        <div class="bottom-item">
+          <h4>Grafo Interactivo</h4>
+          {% if grafo_html %}
+            {% autoescape off %}
+            {{ grafo_html }}
+            {% endautoescape %}
+          {% else %}
+            <p>No hay datos para generar el grafo.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Formulario para insertar mensajes (solo para administradores) -->
+      {% if user.is_staff %}
+      <div class="admin-form">
+        <h4>Inserción de Mensajes</h4>
+        <form method="POST" action="{% url 'insertar_mensajes' %}">
+          {% csrf_token %}
+          <input type="text" name="cliente" placeholder="Cliente" required>
+          <input type="text" name="text_data" placeholder="Mensaje" required>
+          <input type="text" name="number2" placeholder="Celular" required>
+          <input type="text" name="estado" placeholder="Estado" required>
+          <input type="text" name="municipio" placeholder="Municipio" required>
+          <input type="text" name="group_name" placeholder="Grupo (opcional)">
+          <input type="number" name="cantidad" min="1" placeholder="Cantidad" required>
+          <button type="submit">Insertar Mensajes</button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Tabla de Datos -->
+      <div class="chart-container">
+        <h4>Tabla de Datos</h4>
+        {% if datos_tabla %}
+        <table class="data-table">
+          <thead>
             <tr>
-            <th>Palabra</th>
-            <th>Frecuencia</th>
+              {% if user.is_staff %}
+              <th class="pad-col group-col">Cliente</th>
+              <th class="pad-col group-col">Estado</th>
+              <th class="pad-col group-col">Municipio</th>
+              {% endif %}
+              <th class="pad-col group-col">Grupo</th>
+              <th class="pad-col number-col">Número</th>
+              <th>Mensaje</th>
             </tr>
-        </thead>
-        </center>
-        <tbody>
-            {% for palabra, frecuencia in top_palabras %}
+          </thead>
+          <tbody>
+            {% for row in datos_tabla %}
             <tr>
-                <td>{{ palabra }}</td>
-                <td>{{ frecuencia }}</td>
+              {% if user.is_staff %}
+              <td class="pad-col">{{ row.cliente }}</td>
+              <td class="pad-col">{{ row.estado }}</td>
+              <td class="pad-col">{{ row.municipio }}</td>
+              {% endif %}
+              <td class="pad-col">{{ row.group_name }}</td>
+              <td class="pad-col">{{ row.number2 }}</td>
+              <td>{{ row.text_data }}</td>
             </tr>
             {% endfor %}
-        </tbody>
+          </tbody>
         </table>
-
-        <!-- Botón para consultar el top 10 -->
-        <form method="GET" action="{% url 'top_palabras_view' %}">
-            <button type="submit">Consultar Top 10 Palabras</button>
-        </form>
-
-        <!-- Tabla de datos -->
-        {% if datos_tabla %}
-        <div class="data-table">
-            <h2>Datos Extraídos</h2>
-            <table>
-                <thead>
-                    <tr>
-                        {% if user.is_staff %}
-                        <th>Cliente</th>
-                        <th>Estado</th>
-                        <th>Municipio</th>
-                        {% endif %}
-                        <th>Grupo</th>
-                        <th>Número</th>
-                        <th>Mensaje</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in datos_tabla %}
-                    <tr>
-                        {% if user.is_staff %}
-                        <td>{{ row.cliente }}</td>
-                        <td>{{ row.estado }}</td>
-                        <td>{{ row.municipio }}</td>
-                        {% endif %}
-                        <td>{{ row.group_name }}</td>
-                        <td>{{ row.number2 }}</td>
-                        <td>{{ row.text_data }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% else %}
+        <p>No hay datos para mostrar en la tabla.</p>
         {% endif %}
-    </main>
+      </div>
+
+    </div> <!-- main-content -->
+  </div> <!-- dashboard-container -->
+
+  <!-- Script para la gráfica de Top 10 Palabras -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('topWordsChart').getContext('2d');
+      // Crear arrays para etiquetas y valores a partir de top_palabras
+      const labels = [
+        {% for palabra, freq in top_palabras %}
+          "{{ palabra }}",
+        {% endfor %}
+      ];
+      const dataValues = [
+        {% for palabra, freq in top_palabras %}
+          {{ freq }},
+        {% endfor %}
+      ];
+      // Definir arrays de colores (uno para cada barra, se asume que top_palabras tiene hasta 10 elementos)
+      const backgroundColors = [
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 206, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(199, 199, 199, 0.6)',
+        'rgba(83, 102, 255, 0.6)',
+        'rgba(255, 102, 255, 0.6)',
+        'rgba(99, 255, 132, 0.6)'
+      ];
+      const borderColors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(199, 199, 199, 1)',
+        'rgba(83, 102, 255, 1)',
+        'rgba(255, 102, 255, 1)',
+        'rgba(99, 255, 132, 1)'
+      ];
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Frecuencia',
+            data: dataValues,
+            backgroundColor: backgroundColors.slice(0, dataValues.length),
+            borderColor: borderColors.slice(0, dataValues.length),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>

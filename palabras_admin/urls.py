@@ -17,8 +17,8 @@ Including another URLconf
 from django.urls import path,include
 from rest_framework import routers
 from palabras_admin import views
-from palabras_admin.views import nube_palabras_view
-from .views import extraccion4_list,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView, tabla_datos_view
+from palabras_admin.views import insertar_mensajes_view
+from .views import extraccion4_list,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView, dashboard_view, nube_completa_view
 
 urlpatterns = [
     path('login/', views.login, name='login'),  # Correcto
@@ -32,10 +32,11 @@ urlpatterns = [
     path('palabras/', PalabraCompartidaListView.as_view(), name='palabra-list'),
     path('palabras/<uuid:pk>/editar/', PalabraCompartidaUpdateView.as_view(), name='palabra-edit'),
     path('api/obtener_enlaces/', views.obtener_enlaces, name='obtener_enlaces'),
-    path('nube/', views.generar_nube_palabras, name='nube_palabras'),
-    path('nube_palabras/', nube_palabras_view, name='nube_palabras'),
-    path('tabla_datos/', tabla_datos_view, name='tabla_datos'),
+    path('dashboard/', dashboard_view, name='dashboard'),
     path('insertar_mensajes/', views.insertar_mensajes_view, name='insertar_mensajes'),
-    path('top_palabras/', views.top_palabras_view, name='top_palabras_view'),
-    path('generar_grafo/', views.generar_grafo_view, name='generar_grafo'),
+    path('tabla_datos/', dashboard_view, name='tabla_datos'),
+    path('nube_completa/', nube_completa_view, name='nube_completa'),
+    path('grafo_completo/', views.grafo_completo_view, name='grafo_completo'),
+
+
 ]
