@@ -132,3 +132,13 @@ class AreaCodeMX(models.Model):
     estado = models.CharField(max_length=50,null=True)
     def __str__(self):
         return self.code
+    
+class MonitoreoPalabras(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    palabra = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('usuario', 'palabra')  # Evita palabras duplicadas por usuario
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.palabra}"

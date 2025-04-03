@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-iy$plyxm-d*zu$y0k1toqyc&+-&n*3l=bp5@=obrk2k*fst!fp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1","nube-palabras.zapto.org","escuchasocial.zapto.org","216.225.196.110","187.190.174.234", "https://escucha-social.onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "nube-palabras.zapto.org", "escuchasocial.zapto.org", "216.225.196.110", "187.190.174.234", "escucha-social.onrender.com"]
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'nube_palabras.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -85,7 +86,7 @@ DATABASES = {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'data_wa',
             'USER': 'admin',
-            'PASSWORD': 'F@c3b00k',
+            'PASSWORD': 'S3gur1d4d2025',
             'HOST': '158.69.26.160',
             'PORT': '3306',
         }
@@ -137,9 +138,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True  # Para propósitos de desarrollo, en producción usa CORS_ALLOWED_ORIGINS

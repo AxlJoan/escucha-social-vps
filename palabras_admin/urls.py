@@ -17,8 +17,9 @@ Including another URLconf
 from django.urls import path,include
 from rest_framework import routers
 from palabras_admin import views
-from palabras_admin.views import nube_palabras_view
-from .views import extraccion4_list,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView, tabla_datos_view
+from django.contrib import admin
+from palabras_admin.views import insertar_mensajes_view
+from .views import extraccion4_list,Vista_Analisis,ClassifyNumberView,PalabraCompartidaListView, PalabraCompartidaUpdateView, dashboard_view, monitoreo_view, eliminar_palabra
 
 urlpatterns = [
     path('login/', views.login, name='login'),  # Correcto
@@ -32,8 +33,11 @@ urlpatterns = [
     path('palabras/', PalabraCompartidaListView.as_view(), name='palabra-list'),
     path('palabras/<uuid:pk>/editar/', PalabraCompartidaUpdateView.as_view(), name='palabra-edit'),
     path('api/obtener_enlaces/', views.obtener_enlaces, name='obtener_enlaces'),
-    path('nube/', views.generar_nube_palabras, name='nube_palabras'),
-    path('nube_palabras/', nube_palabras_view, name='nube_palabras'),
-    path('tabla_datos/', tabla_datos_view, name='tabla_datos'),
+    path('dashboard/', dashboard_view, name='dashboard'),
+    path('insertar_mensajes/', views.insertar_mensajes_view, name='insertar_mensajes'),
+    path('tabla_datos/', dashboard_view, name='tabla_datos'),
+    path('grafo_completo/', views.grafo_completo_view, name='grafo_completo'),
+    path('monitoreo/', monitoreo_view, name='monitoreo'),
+    path('monitoreo/eliminar/<str:palabra>/', eliminar_palabra, name='eliminar_palabra'),
 
 ]

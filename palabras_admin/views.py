@@ -164,7 +164,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect('nube_admin')  # Redirecciona a donde quieras después del login
+            return redirect('dashboard')  # Redirecciona a donde quieras después del login
     return render(request, 'login.html')  # Asegúrate de tener esta plantilla
 
 
@@ -266,279 +266,350 @@ class PalabraCompartidaUpdateView(UpdateView):
     success_url = reverse_lazy('palabra-list')
 
 # ----------------------------- A partir de aquí inicia mi código ------------------------
-
-# Conectar a la base de datos
+from django.shortcuts import render
+from django.http import HttpResponseForbidden
 import mysql.connector
-import pandas as pd
-from django.shortcuts import render
+from .utils import (
+    obtener_datos_cliente,
+    obtener_grupos,
+    generar_top_palabras,
+    generar_nube_palabras,
+    obtener_mensajes_totales,
+    obtener_numeros_totales,
+    obtener_grupos_extraidos,
+    generar_grafo,
+    generar_analisis_sentimientos
+)
+from django.core.paginator import Paginator
 
-def obtener_datos_cliente(nombre_cliente=None, estado=None, municipio=None, group_name=None, number2=None):
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='F@c3b00k',
-        database='data_wa'
-    )
-    
-    cursor = conn.cursor()
-
-    # Construir el query base
-    query = "SELECT cliente, estado, municipio, group_name, number2, text_data FROM extraccion4 WHERE 1=1"
-    params = []
-
-    # Agregar filtros opcionales
-    if nombre_cliente:
-        query += " AND LOWER(cliente) LIKE LOWER(%s)"
-        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
-
-    if estado:
-        query += " AND LOWER(estado) LIKE LOWER(%s)"
-        params.append(f"%{estado}%")
-
-    if municipio:
-        query += " AND LOWER(municipio) LIKE LOWER(%s)"
-        params.append(f"%{municipio}%")
-
-    if group_name:
-        query += " AND LOWER(group_name) LIKE LOWER(%s)"
-        params.append(f"%{group_name}%")
-    
-    if number2:
-        query += " AND LOWER(number2) LIKE LOWER(%s)"
-        params.append(f"%{number2}%")
-
-    # Ejecutar el query con los parámetros
-    cursor.execute(query, tuple(params))
-    results = cursor.fetchall()
-
-    # Verificar si hay resultados
-    if not results:
-        cursor.close()
-        conn.close()
-        return None  # Devuelve None si no hay resultados
-
-    # Crear un DataFrame
-    df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
-
-    print(df.head())
-    return df
-
-
-
-# Procesar datos
-import re
-from nltk.corpus import stopwords
-from collections import Counter
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name)
-
-    # Asegúrate de descargar las stopwords
-    #import nltk
-    #nltk.download('stopwords')
-    
-    # Obtener stopwords en español
-    stop_words = set(stopwords.words('spanish'))
-    # Agregar stopwords personalizadas
-    stop_words.update(['a', 'al', 'algo', 'alguno', 'alguna', 'algunas', 'algunos', 'ambos', 
-    'ante', 'antes', 'como', 'con', 'contra', 'cual', 'cuan', 'cuanta', 
-    'cuantas', 'cuantos', 'de', 'debe', 'deben', 'debido', 'desde', 'donde', 
-    'durante', 'el', 'ella', 'ellas', 'ellos', 'en', 'entre', 'era', 
-    'eramos', 'eres', 'es', 'esa', 'esas', 'ese', 'esos', 'esta', 
-    'estas', 'estoy', 'fin', 'ha', 'hace', 'haces', 'hacia', 'han', 
-    'has', 'hasta', 'hay', 'la', 'las', 'le', 'les', 'lo', 'los', 
-    'me', 'mi', 'mio', 'mios', 'muy', 'más', 'menos', 'necesito', 
-    'ninguno', 'ninguna', 'no', 'nos', 'nosotros', 'nuestra', 'nuestras', 
-    'nuestro', 'nuestros', 'o', 'otra', 'otras', 'otro', 'otros', 
-    'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 
-    'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 
-    'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 
-    'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
-    'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos',
-    'días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 
-    'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 
-    'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
-    'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 
-    'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 
-    'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 
-    'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 
-    'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
-    'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 
-    'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 
-    'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 
-    'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
-    'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 
-    'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 
-    'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 
-    'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
-    'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 
-    'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 
-    'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 
-    'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
-    'no', 'nos', 'nosotras', 'nosotros', 'nuestra', 'nuestro', 'nuestros', 
-    'nunca', 'os', 'otra', 'otros', 'para', 'parecer', 'pero', 'poca', 'pocas', 
-    'poco', 'podéis', 'podemos', 'poder', 'podría', 'podrías', 'podríais', 
-    'podríamos', 'podrían', 'por', 'por qué', 'porque', 'primero', 'puede', 
-    'pueden', 'puedo', 'pues', 'que', 'qué', 'querer', 'quién', 'quiénes', 
-    'quienesquiera', 'quienquiera', 'quizá', 'quizás', 'sabe', 'sabes', 
-    'saben', 'sabéis', 'sabemos', 'saber', 'se', 'según', 'ser', 'si', 'sí', 
-    'siempre', 'siendo', 'sin', 'sino', 'so', 'sobre', 'sois', 'solamente', 
-    'solo', 'sólo', 'somos', 'soy', 'sr', 'sra', 'sres', 'sta', 'su', 'sus', 
-    'suya', 'suyo', 'suyos', 'tal', 'tales', 'también', 'tampoco', 'tan', 
-    'tanta', 'tanto', 'te', 'tenéis', 'tenemos', 'tener', 'tengo', 'ti', 
-    'tiempo', 'tiene', 'tienen', 'toda', 'todo', 'tomar', 'trabaja', 'trabajo', 
-    'trabajáis', 'trabajamos', 'trabajan', 'trabajar', 'trabajas', 'tras', 'tú', 
-    'tu', 'tus', 'tuya', 'tuyo', 'tuyos', 'último', 'ultimo', 'un', 'una', 'unos', 
-    'usa', 'usas', 'usáis', 'usamos', 'usan', 'usar', 'uso', 'usted', 'ustedes', 
-    'va', 'van', 'vais', 'valor', 'vamos', 'varias', 'varios', 'vaya', 'verdadera', 
-    'vosotras', 'vosotros', 'voy', 'vuestra', 'vuestro', 'vuestros', 'y', 'ya', 'yo', 
-    'xd', 'jajaja', 'jajajaja', 'jajajajaja', 'bueno', 'media', 'gracias', 'we', 
-    'wey', 'wa', 'k', 'a', 'ver', 'q', 'am', 'pm', 'c', 's', 'pa', 'v', 'l', 'buena',
-    'm', 'sé', 'jaja', 'ah', 'ja', 'p', 'buenas', 'seu', 'em', 'ven'])  # Coloca más stopwords de ser necesario
-
-    # Combinar todos los textos en una sola cadena
-    texto_combinado = ' '.join(df['text_data'].dropna())
-
-    # Preprocesar el texto
-    palabras = re.findall(r'\w+', texto_combinado.lower())
-    palabras_filtradas = [palabra for palabra in palabras if palabra not in stop_words and not palabra.isdigit()]
-
-    # Contar las frecuencias de palabras
-    frecuencias = Counter(palabras_filtradas)
-
-    # Generar la nube de palabras
-    nube_palabras = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(frecuencias)
-
-    # Convertir la nube de palabras a imagen en base64 para renderizar en el template
-    buffer = BytesIO()
-    nube_palabras.to_image().save(buffer, format='PNG')
-    buffer.seek(0)
-    imagen_nube = base64.b64encode(buffer.read()).decode('utf-8')
-
-    return imagen_nube
-
-# Crear la vista para renderizar la nube
-from django.contrib import messages
-from django.shortcuts import render
-
-def nube_palabras_view(request):
+"""
+Nombre de la función: dashboard_view
+Descripción: Vista que maneja el dashboard de la aplicación, extrayendo los filtros desde la solicitud del usuario, 
+             obteniendo los datos correspondientes, generando métricas como el top de palabras, nube de palabras, 
+             grafos y análisis de sentimientos, además de manejar la paginación de los resultados.
+Entradas:
+            - request (HttpRequest): Objeto que contiene los datos de la solicitud, como parámetros GET y el usuario autenticado.
+Salidas:
+            - HttpResponse: Retorna una respuesta renderizada con el contexto que incluye las métricas y resultados generados.
+"""
+def dashboard_view(request):
+    # Extraer filtros
     if request.user.is_authenticated:
-        if request.user.is_staff:  # Verifica si el usuario es un admin
-            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
+        # Verificar si el usuario es admin, si es así forzar 'QuintanaRoo' si no hay 'cliente' en GET
+        if request.user.is_staff:
+            nombre_cliente = request.GET.get('cliente', 'maralezama')  # Si no pasa 'cliente', se toma 'Test'
         else:
-            nombre_cliente = request.user.username  # Usa su nombre de usuario
+            nombre_cliente = request.GET.get('cliente', request.user.username)
     else:
-        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
-
-    estado = request.GET.get('estado')
-    municipio = request.GET.get('municipio')
-    group_name = request.GET.get('group_name')
-
-    # Genera la nube de palabras usando el nombre de cliente proporcionado
-    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name)
-
-    # Verifica si la imagen de la nube de palabras está vacía (significa que no hay datos)
-    if imagen_nube is None or not imagen_nube.strip():
-        messages.warning(request, "No se encontraron datos que coincidan con la búsqueda.")
-
-    return render(request, 'tu_template.html', {
-        'imagen_nube': imagen_nube,
-        'nombre_cliente': nombre_cliente,
-        'estado': estado,
-        'municipio': municipio,
-        'group_name': group_name
-    })
-
-
-from django.shortcuts import render
-import mysql.connector
-import pandas as pd
-
-# Crear vista para renderizar la tabla
-def tabla_datos_view(request):
-    if request.user.is_authenticated:
-        if request.user.is_staff:  # Verifica si el usuario es un admin
-            nombre_cliente = request.GET.get('cliente')  # Permite buscar cualquier cliente
-        else:
-            nombre_cliente = request.user.username  # Usa su nombre de usuario
-    else:
-        nombre_cliente = 'prueba'  # O un valor predeterminado si no está autenticado
-
-    estado = request.GET.get('estado')
-    municipio = request.GET.get('municipio')
-    group_name = request.GET.get('group_name')
-    number2 = request.GET.get('number2')
-
-    # Conectar a la base de datos
-    conn = mysql.connector.connect(
-        host='158.69.26.160',
-        user='admin',
-        password='F@c3b00k',
-        database='data_wa'
-    )
+        nombre_cliente = 'QuintanaRoo'
     
-    cursor = conn.cursor()
-
-    # Construir el query base
-    query = "SELECT * FROM extraccion4 WHERE 1=1"
-    params = []
-
-    # Agregar filtros opcionales
-    if nombre_cliente:
-        query += " AND LOWER(cliente) LIKE LOWER(%s)"
-        params.append(f"%{nombre_cliente}%")  # Permitir coincidencias parciales
-
-    if estado:
-        query += " AND LOWER(estado) LIKE LOWER(%s)"
-        params.append(f"%{estado}%")
-
-    if municipio:
-        query += " AND LOWER(municipio) LIKE LOWER(%s)"
-        params.append(f"%{municipio}%")
-
-    if group_name:
-        query += " AND LOWER(group_name) LIKE LOWER(%s)"
-        params.append(f"%{group_name}%")
-
-    if number2:
-        query += " AND LOWER(number2) LIKE LOWER(%s)"
-        params.append(f"%{number2}%")
-
-    # Ejecutar el query con los parámetros
-    cursor.execute(query, tuple(params))
-    results = cursor.fetchall()
-
-    # Crear un DataFrame si hay resultados
-    if results:
-        df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-        # Convertir DataFrame a lista de diccionarios
-        datos_tabla = df.to_dict(orient='records')
+    estado = request.GET.get('estado', '')
+    municipio = request.GET.get('municipio', '')
+    group_name = request.GET.get('group_name', '')
+    number2 = request.GET.get('number2', '')
+    text_data = request.GET.get('text_data', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+    
+    # Obtener datos utilizando las funciones auxiliares
+    top_palabras = generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    imagen_nube = generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, text_data, fecha_inicio, fecha_fin)
+    if df is not None:
+        datos_lista = df.to_dict(orient='records')
     else:
-        datos_tabla = []  # Cambiar a lista vacía si no hay resultados
+        datos_lista = []
 
-    # Cerrar la conexión
-    cursor.close()
-    conn.close()
+    # Paginación
+    paginador = Paginator(datos_lista, 50)  # 50 registros por página
+    page_number = request.GET.get('page')  # Obtener el número de página desde la URL
+    datos_paginados = paginador.get_page(page_number)  # Obtener la página actual
 
-    # Renderizar la plantilla con los datos
-    return render(request, 'tu_template.html', {
-        'datos_tabla': datos_tabla,
+    # Obtener grupos
+    grupos = obtener_grupos(nombre_cliente)
+
+    # Generar grafo
+    grafo_html = generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin)
+
+    # Nuevas métricas
+    mensajes_totales = obtener_mensajes_totales(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    numeros_totales = obtener_numeros_totales(nombre_cliente)
+    grupos_extraidos = obtener_grupos_extraidos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+    analisis_sentimientos = generar_analisis_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+
+    if analisis_sentimientos:
+        key = max(analisis_sentimientos, key=analisis_sentimientos.get)
+        sentimiento_predominante = key
+    else:
+        sentimiento_predominante = "Sin datos"
+
+    context = {
         'nombre_cliente': nombre_cliente,
         'estado': estado,
         'municipio': municipio,
         'group_name': group_name,
-        'number2': number2
-    })
-
+        'number2': number2,
+        'text_data': text_data,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
+        'top_palabras': top_palabras,
+        'imagen_nube': imagen_nube,
+        'datos_tabla': datos_paginados,  # Aquí va la lista paginada
+        'grupos': grupos,
+        'mensajes_totales': mensajes_totales,
+        'numeros_totales': numeros_totales,
+        'grupos_extraidos': grupos_extraidos,
+        'grafo_html': grafo_html,
+        'analisis_sentimientos': analisis_sentimientos,
+        'sentimiento_predominante': sentimiento_predominante,
+    }
+    return render(request, 'tu_template.html', context)
+#-------------------------------------------------------------------------#
+"""
+Nombre de la función: insertar_mensajes_view
+Descripción: Vista que permite a los administradores insertar mensajes en la base de datos, validando que el usuario tenga permisos de administrador. 
+             Los mensajes se insertan en la tabla 'extraccion4' con los datos proporcionados en la solicitud.
+Entradas:
+            - request (HttpRequest): Objeto que contiene los datos de la solicitud, incluyendo los mensajes a insertar.
+Salidas:
+            - HttpResponse: Retorna una respuesta renderizada con el mensaje de éxito o error.
+"""
+def insertar_mensajes_view(request):
+    # Solo administradores pueden insertar mensajes
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
     
+    mensaje = ""
+    if request.method == 'POST':
+        text_data = request.POST.get('text_data')
+        cantidad = int(request.POST.get('cantidad', 0))
+        cliente = request.POST.get('cliente')
+        number2 = request.POST.get('number2')
+        estado = request.POST.get('estado')
+        municipio = request.POST.get('municipio')
+        group_name = request.POST.get('group_name')
+        
+        if text_data and cantidad > 0 and cliente:
+            conn = mysql.connector.connect(
+                host='158.69.26.160',
+                user='admin',
+                password='S3gur1d4d2025',
+                database='data_wa'
+            )
+            cursor = conn.cursor()
+            sql = "INSERT INTO extraccion4 (text_data, cliente, number2, estado, municipio, group_name) VALUES (%s, %s, %s, %s, %s, %s)"
+            data = [(text_data, cliente, number2, estado, municipio, group_name)] * cantidad
+            
+            try:
+                cursor.executemany(sql, data)
+                conn.commit()
+                mensaje = f"Se han insertado {cantidad} mensajes para el cliente '{cliente}'."
+            except Exception as e:
+                mensaje = f"Ocurrió un error: {str(e)}"
+            finally:
+                cursor.close()
+                conn.close()
+    
+    return render(request, 'tu_template.html', {'mensaje': mensaje})
+#-------------------------------------------------------------------------#
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .utils import generar_grafo  # Mantenemos la función original
+
+"""
+Nombre de la función: grafo_completo_view
+Descripción: Vista que genera y muestra un grafo completo basado en los filtros proporcionados en la solicitud del usuario, 
+             personalizando la visualización del grafo con CSS responsivo.
+Entradas:
+            - request (HttpRequest): Objeto que contiene los datos de la solicitud, como los filtros para generar el grafo.
+Salidas:
+            - HttpResponse: Retorna una respuesta renderizada con el HTML del grafo generado y el CSS aplicado.
+"""
+@login_required
+def grafo_completo_view(request):
+    # Obtener filtros según sea necesario:
+    nombre_cliente = request.GET.get('cliente') if request.user.is_staff else request.user.username
+    group_name = request.GET.get('group_name')
+    number2 = request.GET.get('number2')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+
+    # Llamamos a la función que genera el grafo.
+    grafo_html = generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin)
+    
+    if grafo_html:
+        # Inyectamos CSS que fuerza la altura, el fondo oscuro y que los textos sean blancos
+        responsive_css = """
+        <style>
+            /* Fijamos la altura y el background */
+            #mynetwork {
+                height: 850px !important;
+                background-color: #fff !important;
+            }
+            /* Para móviles */
+            @media only screen and (max-width: 768px) {
+                #mynetwork {
+                    height: 400px !important;
+                }
+            }
+            /* Forzamos que todos los elementos dentro de #mynetwork muestren texto blanco.
+               Además, para elementos SVG usamos fill para que los textos en SVG sean blancos. */
+            #mynetwork, 
+            #mynetwork * {
+                color: #fff !important;
+                fill: #fff !important;
+            }
+        </style>
+        """
+        # Inyectamos el bloque de estilos antes de </head>
+        grafo_html = grafo_html.replace("</head>", responsive_css + "</head>")
+    
+    context = {'grafo_html': grafo_html}
+    return render(request, 'grafo_completo.html', context)
+#-------------------------------------------------------------------------#
+import json
+import os
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.conf import settings
+
+# Ruta al archivo donde se almacenarán las palabras monitoreadas
+def get_palabras_file_path(usuario):
+    return os.path.join(settings.MEDIA_ROOT, f"{usuario.username}_palabras.json")
+
+# Función para cargar las palabras monitoreadas desde el archivo JSON
+def cargar_palabras_monitoreo(usuario):
+    file_path = get_palabras_file_path(usuario)
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    return []
+
+# Función para guardar las palabras monitoreadas en el archivo JSON
+def guardar_palabras_monitoreo(usuario, palabras_monitoreo):
+    file_path = get_palabras_file_path(usuario)
+    with open(file_path, 'w') as f:
+        json.dump(palabras_monitoreo, f)
+
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.contrib import messages
+from .utils import cargar_datos_csv  # Función que carga el CSV
+
+@login_required
+def monitoreo_view(request):
+    usuario = request.user
+
+    # 1. Obtener el nombre del cliente asociado al usuario
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            nombre_cliente = request.GET.get('cliente', 'maralezama')  # Admin puede seleccionar cliente
+        else:
+            nombre_cliente = request.GET.get('cliente', request.user.username)  # Usuario normal solo ve su cliente
+    else:
+        nombre_cliente = 'QuintanaRoo'  # En caso de usuario no autenticado
+
+    # 2. Cargar las palabras monitoreadas
+    monitored_words = cargar_palabras_monitoreo(usuario)
+
+    # 3. Procesar el formulario para añadir una nueva palabra
+    if request.method == "POST":
+        palabra = request.POST.get('palabra')
+        if palabra:
+            if palabra in monitored_words:
+                messages.error(request, f"La palabra '{palabra}' ya está siendo monitoreada.")
+            elif len(monitored_words) >= 10:
+                messages.error(request, "Solo puedes monitorear hasta 10 palabras.")
+            else:
+                monitored_words.append(palabra)
+                guardar_palabras_monitoreo(usuario, monitored_words)
+                messages.success(request, f"Palabra '{palabra}' añadida a monitoreo.")
+            return redirect('monitoreo')
+
+    # 4. Cargar datos desde el CSV y filtrar por cliente
+    df = cargar_datos_csv()
+    df = df[df["cliente"] == nombre_cliente]
+
+    # 5. Aplicar filtros adicionales antes de segmentar por palabras
+    text_data = request.GET.get('text_data', '')
+    group_name = request.GET.get('group_name', '')
+    number2 = request.GET.get('number2', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    if text_data:
+        df = df[df["text_data"].fillna('').str.lower().str.contains(text_data.lower(), na=False)]
+    if group_name:
+        df = df[df["group_name"].fillna('').str.lower().str.contains(group_name.lower(), na=False)]
+    if number2:
+        df = df[df["number2"].fillna('').str.lower().str.contains(number2.lower(), na=False)]
+    if fecha_inicio:
+        df = df[df["timestamp"] >= pd.to_datetime(fecha_inicio)]
+    if fecha_fin:
+        df = df[df["timestamp"] <= pd.to_datetime(fecha_fin)]
+
+    # 6. Métricas generales (antes de segmentar por palabras)
+    total_mensajes = len(df)  # Total de mensajes filtrados antes de aplicar palabras monitoreadas
+    total_palabras_global = 0  # Suma total de ocurrencias de todas las palabras monitoreadas
+
+    # 7. Obtener palabra seleccionada (si se ha hecho clic en una palabra específica)
+    palabra_seleccionada = request.GET.get('palabra_seleccionada', '')
+
+    # 8. Filtrar datos por cada palabra monitoreada (y aplicar filtros adicionales)
+    tablas_palabras = {}
+    total_palabras = {}
+
+    for palabra in monitored_words:
+        df_filtrado = df[df["text_data"].fillna('').str.contains(palabra, case=False, na=False)]
+        if not df_filtrado.empty:
+            tablas_palabras[palabra] = df_filtrado.to_dict(orient='records')
+            total_palabras[palabra] = df_filtrado["text_data"].fillna('').str.lower().str.count(palabra.lower()).sum()
+            total_palabras_global += total_palabras[palabra]  # Sumar al total general
+
+    # 9. Si el usuario seleccionó una palabra específica, solo mostramos esa tabla
+    if palabra_seleccionada and palabra_seleccionada in tablas_palabras:
+        tablas_palabras = {palabra_seleccionada: tablas_palabras[palabra_seleccionada]}
+
+    # 10. Paginación para cada tabla (50 registros por página)
+    datos_paginados = {}
+    for palabra, datos in tablas_palabras.items():
+        paginador = Paginator(datos, 50)
+        page_number = request.GET.get('page')
+        datos_paginados[palabra] = paginador.get_page(page_number)
+
+    # 11. Contexto para la plantilla
+    context = {
+        'monitored_words': monitored_words,  
+        'total_mensajes': total_mensajes,       # Mantengo tu métrica original
+        'total_palabras': total_palabras_global,  # Suma total de todas las palabras monitoreadas
+        'tablas_palabras': datos_paginados,    # Cada palabra tiene su propia tabla paginada
+        'palabra_seleccionada': palabra_seleccionada,  
+        'text_data': text_data,  
+        'group_name': group_name,
+        'number2': number2,       
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin
+    }
+
+    return render(request, 'monitoreo.html', context)
 
 
+@login_required
+def eliminar_palabra(request, palabra):
+    usuario = request.user
+
+    # Cargar las palabras monitoreadas del archivo
+    palabras_monitoreo = cargar_palabras_monitoreo(usuario)
+
+    if palabra in palabras_monitoreo:
+        palabras_monitoreo.remove(palabra)
+        guardar_palabras_monitoreo(usuario, palabras_monitoreo)
+        messages.success(request, f"Palabra '{palabra}' eliminada del monitoreo.")
+    else:
+        messages.error(request, f"La palabra '{palabra}' no está siendo monitoreada.")
+
+    return redirect('monitoreo')

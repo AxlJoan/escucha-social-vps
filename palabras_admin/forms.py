@@ -1,6 +1,7 @@
 # forms.py
 from django import forms
 from .models import PalabraCompartida
+from .models import MonitoreoPalabras
 
 class PalabraCompartidaForm(forms.ModelForm):
     class Meta:
@@ -14,3 +15,8 @@ class PalabraCompartidaForm(forms.ModelForm):
             'datos': 'Ingrese los datos de la palabra compartida.',
             'total_grupos': 'Ingrese el total de grupos que utilizan esta palabra.',
         }
+
+class MonitoreoPalabrasForm(forms.ModelForm):
+    class Meta:
+        model = MonitoreoPalabras
+        fields = ['palabra']

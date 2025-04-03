@@ -1,0 +1,532 @@
+Feb 19 17:12:19 ubuntu systemd[1]: Stopping gunicorn.service - gunicorn daemon for Django project...
+Feb 19 17:12:19 ubuntu gunicorn[252014]: [2025-02-19 17:12:19 +0000] [252014] [INFO] Worker exiting (pid: 252014)
+Feb 19 17:12:19 ubuntu gunicorn[252016]: [2025-02-19 17:12:19 +0000] [252016] [INFO] Worker exiting (pid: 252016)
+Feb 19 17:12:19 ubuntu gunicorn[252009]: [2025-02-19 17:12:19 +0000] [252009] [INFO] Worker exiting (pid: 252009)
+Feb 19 17:12:19 ubuntu gunicorn[251965]: [2025-02-19 17:12:19 +0000] [251965] [INFO] Handling signal: term
+Feb 19 17:12:19 ubuntu gunicorn[252015]: [2025-02-19 17:12:19 +0000] [252015] [INFO] Worker exiting (pid: 252015)
+Feb 19 17:12:19 ubuntu gunicorn[251965]: [2025-02-19 17:12:19 +0000] [251965] [INFO] Shutting down: Master
+Feb 19 17:12:20 ubuntu systemd[1]: gunicorn.service: Deactivated successfully.
+Feb 19 17:12:20 ubuntu systemd[1]: Stopped gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:20 ubuntu systemd[1]: gunicorn.service: Consumed 3min 3.174s CPU time, 437.4M memory peak, 0B memory swap peak.
+Feb 19 17:12:20 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:20 ubuntu gunicorn[697501]: [2025-02-19 17:12:20 +0000] [697501] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:20 ubuntu gunicorn[697501]: [2025-02-19 17:12:20 +0000] [697501] [INFO] Listening at: unix:/run/gunicorn.sock (697501)
+Feb 19 17:12:20 ubuntu gunicorn[697501]: [2025-02-19 17:12:20 +0000] [697501] [INFO] Using worker: sync
+Feb 19 17:12:20 ubuntu gunicorn[697504]: [2025-02-19 17:12:20 +0000] [697504] [INFO] Booting worker with pid: 697504
+Feb 19 17:12:20 ubuntu gunicorn[697505]: [2025-02-19 17:12:20 +0000] [697505] [INFO] Booting worker with pid: 697505
+Feb 19 17:12:20 ubuntu gunicorn[697504]: [2025-02-19 17:12:20 +0000] [697504] [ERROR] Exception in worker process
+Feb 19 17:12:20 ubuntu gunicorn[697504]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     worker.init_process()
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     self.load_wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697504]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     self.callable = self.load()
+Feb 19 17:12:20 ubuntu gunicorn[697504]:                     ^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     return self.load_wsgiapp()
+Feb 19 17:12:20 ubuntu gunicorn[697504]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     return util.import_app(self.app_uri)
+Feb 19 17:12:20 ubuntu gunicorn[697504]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     mod = importlib.import_module(module)
+Feb 19 17:12:20 ubuntu gunicorn[697504]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:20 ubuntu gunicorn[697504]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:20 ubuntu gunicorn[697504]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697504]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697504]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:20 ubuntu gunicorn[697504]: [2025-02-19 17:12:20 +0000] [697504] [INFO] Worker exiting (pid: 697504)
+Feb 19 17:12:20 ubuntu gunicorn[697505]: [2025-02-19 17:12:20 +0000] [697505] [ERROR] Exception in worker process
+Feb 19 17:12:20 ubuntu gunicorn[697505]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     worker.init_process()
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     self.load_wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697505]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     self.callable = self.load()
+Feb 19 17:12:20 ubuntu gunicorn[697505]:                     ^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     return self.load_wsgiapp()
+Feb 19 17:12:20 ubuntu gunicorn[697505]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     return util.import_app(self.app_uri)
+Feb 19 17:12:20 ubuntu gunicorn[697505]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     mod = importlib.import_module(module)
+Feb 19 17:12:20 ubuntu gunicorn[697505]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:20 ubuntu gunicorn[697505]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:20 ubuntu gunicorn[697505]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697505]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697505]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:20 ubuntu gunicorn[697505]: [2025-02-19 17:12:20 +0000] [697505] [INFO] Worker exiting (pid: 697505)
+Feb 19 17:12:20 ubuntu gunicorn[697501]: [2025-02-19 17:12:20 +0000] [697501] [ERROR] Worker (pid:697504) exited with code 3
+Feb 19 17:12:20 ubuntu gunicorn[697501]: [2025-02-19 17:12:20 +0000] [697501] [ERROR] Worker (pid:697505) exited with code 3
+Feb 19 17:12:20 ubuntu gunicorn[697501]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 202, in run
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.manage_workers()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 571, in manage_workers
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.spawn_workers()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 643, in spawn_workers
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     time.sleep(0.1 * random.random())
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 242, in handle_chld
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.reap_workers()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 530, in reap_workers
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+Feb 19 17:12:20 ubuntu gunicorn[697501]: gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>
+Feb 19 17:12:20 ubuntu gunicorn[697501]: During handling of the above exception, another exception occurred:
+Feb 19 17:12:20 ubuntu gunicorn[697501]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/bin/gunicorn", line 8, in <module>
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     sys.exit(run())
+Feb 19 17:12:20 ubuntu gunicorn[697501]:              ^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 67, in run
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]", prog=prog).run()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 236, in run
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     super().run()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 72, in run
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     Arbiter(self).run()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 229, in run
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.halt(reason=inst.reason, exit_status=inst.exit_status)
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 342, in halt
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.stop()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 396, in stop
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     time.sleep(0.1)
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 242, in handle_chld
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     self.reap_workers()
+Feb 19 17:12:20 ubuntu gunicorn[697501]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 530, in reap_workers
+Feb 19 17:12:20 ubuntu gunicorn[697501]:     raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+Feb 19 17:12:20 ubuntu gunicorn[697501]: gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=1/FAILURE[0m
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:20 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 1.
+Feb 19 17:12:20 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [INFO] Listening at: unix:/run/gunicorn.sock (697507)
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [INFO] Using worker: sync
+Feb 19 17:12:20 ubuntu gunicorn[697508]: [2025-02-19 17:12:20 +0000] [697508] [INFO] Booting worker with pid: 697508
+Feb 19 17:12:20 ubuntu gunicorn[697508]: [2025-02-19 17:12:20 +0000] [697508] [ERROR] Exception in worker process
+Feb 19 17:12:20 ubuntu gunicorn[697508]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     worker.init_process()
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     self.load_wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697508]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     self.callable = self.load()
+Feb 19 17:12:20 ubuntu gunicorn[697508]:                     ^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     return self.load_wsgiapp()
+Feb 19 17:12:20 ubuntu gunicorn[697508]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     return util.import_app(self.app_uri)
+Feb 19 17:12:20 ubuntu gunicorn[697508]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     mod = importlib.import_module(module)
+Feb 19 17:12:20 ubuntu gunicorn[697508]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:20 ubuntu gunicorn[697508]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:20 ubuntu gunicorn[697508]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697508]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697508]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:20 ubuntu gunicorn[697508]: [2025-02-19 17:12:20 +0000] [697508] [INFO] Worker exiting (pid: 697508)
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [ERROR] Worker (pid:697508) exited with code 3
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [ERROR] Shutting down: Master
+Feb 19 17:12:20 ubuntu gunicorn[697507]: [2025-02-19 17:12:20 +0000] [697507] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:20 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 2.
+Feb 19 17:12:20 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [INFO] Listening at: unix:/run/gunicorn.sock (697511)
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [INFO] Using worker: sync
+Feb 19 17:12:20 ubuntu gunicorn[697521]: [2025-02-19 17:12:20 +0000] [697521] [INFO] Booting worker with pid: 697521
+Feb 19 17:12:20 ubuntu gunicorn[697521]: [2025-02-19 17:12:20 +0000] [697521] [ERROR] Exception in worker process
+Feb 19 17:12:20 ubuntu gunicorn[697521]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     worker.init_process()
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     self.load_wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697521]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     self.callable = self.load()
+Feb 19 17:12:20 ubuntu gunicorn[697521]:                     ^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     return self.load_wsgiapp()
+Feb 19 17:12:20 ubuntu gunicorn[697521]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     return util.import_app(self.app_uri)
+Feb 19 17:12:20 ubuntu gunicorn[697521]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     mod = importlib.import_module(module)
+Feb 19 17:12:20 ubuntu gunicorn[697521]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:20 ubuntu gunicorn[697521]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:20 ubuntu gunicorn[697521]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697521]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697521]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:20 ubuntu gunicorn[697521]: [2025-02-19 17:12:20 +0000] [697521] [INFO] Worker exiting (pid: 697521)
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [ERROR] Worker (pid:697521) exited with code 3
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [ERROR] Shutting down: Master
+Feb 19 17:12:20 ubuntu gunicorn[697511]: [2025-02-19 17:12:20 +0000] [697511] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:20 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 3.
+Feb 19 17:12:20 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [INFO] Listening at: unix:/run/gunicorn.sock (697523)
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [INFO] Using worker: sync
+Feb 19 17:12:20 ubuntu gunicorn[697524]: [2025-02-19 17:12:20 +0000] [697524] [INFO] Booting worker with pid: 697524
+Feb 19 17:12:20 ubuntu gunicorn[697524]: [2025-02-19 17:12:20 +0000] [697524] [ERROR] Exception in worker process
+Feb 19 17:12:20 ubuntu gunicorn[697524]: Traceback (most recent call last):
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     worker.init_process()
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     self.load_wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:20 ubuntu gunicorn[697524]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     self.callable = self.load()
+Feb 19 17:12:20 ubuntu gunicorn[697524]:                     ^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     return self.load_wsgiapp()
+Feb 19 17:12:20 ubuntu gunicorn[697524]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     return util.import_app(self.app_uri)
+Feb 19 17:12:20 ubuntu gunicorn[697524]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     mod = importlib.import_module(module)
+Feb 19 17:12:20 ubuntu gunicorn[697524]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:20 ubuntu gunicorn[697524]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:20 ubuntu gunicorn[697524]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:20 ubuntu gunicorn[697524]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:20 ubuntu gunicorn[697524]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:20 ubuntu gunicorn[697524]: [2025-02-19 17:12:20 +0000] [697524] [INFO] Worker exiting (pid: 697524)
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [ERROR] Worker (pid:697524) exited with code 3
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [ERROR] Shutting down: Master
+Feb 19 17:12:20 ubuntu gunicorn[697523]: [2025-02-19 17:12:20 +0000] [697523] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:20 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:21 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 4.
+Feb 19 17:12:21 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [INFO] Listening at: unix:/run/gunicorn.sock (697526)
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [INFO] Using worker: sync
+Feb 19 17:12:21 ubuntu gunicorn[697527]: [2025-02-19 17:12:21 +0000] [697527] [INFO] Booting worker with pid: 697527
+Feb 19 17:12:21 ubuntu gunicorn[697527]: [2025-02-19 17:12:21 +0000] [697527] [ERROR] Exception in worker process
+Feb 19 17:12:21 ubuntu gunicorn[697527]: Traceback (most recent call last):
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     worker.init_process()
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     self.load_wsgi()
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:21 ubuntu gunicorn[697527]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     self.callable = self.load()
+Feb 19 17:12:21 ubuntu gunicorn[697527]:                     ^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     return self.load_wsgiapp()
+Feb 19 17:12:21 ubuntu gunicorn[697527]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     return util.import_app(self.app_uri)
+Feb 19 17:12:21 ubuntu gunicorn[697527]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     mod = importlib.import_module(module)
+Feb 19 17:12:21 ubuntu gunicorn[697527]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:21 ubuntu gunicorn[697527]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:21 ubuntu gunicorn[697527]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:21 ubuntu gunicorn[697527]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:21 ubuntu gunicorn[697527]: ModuleNotFoundError: No module named 'django-palab'
+Feb 19 17:12:21 ubuntu gunicorn[697527]: [2025-02-19 17:12:21 +0000] [697527] [INFO] Worker exiting (pid: 697527)
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [ERROR] Worker (pid:697527) exited with code 3
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [ERROR] Shutting down: Master
+Feb 19 17:12:21 ubuntu gunicorn[697526]: [2025-02-19 17:12:21 +0000] [697526] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:21 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:21 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:21 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 5.
+Feb 19 17:12:21 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Start request repeated too quickly.[0m
+Feb 19 17:12:21 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:21 ubuntu systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start gunicorn.service - gunicorn daemon for Django project.[0m
+Feb 19 17:12:49 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:49 ubuntu gunicorn[697626]: [2025-02-19 17:12:49 +0000] [697626] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:49 ubuntu gunicorn[697626]: [2025-02-19 17:12:49 +0000] [697626] [INFO] Listening at: unix:/var/www/django-palab/gunicorn.sock (697626)
+Feb 19 17:12:49 ubuntu gunicorn[697626]: [2025-02-19 17:12:49 +0000] [697626] [INFO] Using worker: sync
+Feb 19 17:12:49 ubuntu gunicorn[697628]: [2025-02-19 17:12:49 +0000] [697628] [INFO] Booting worker with pid: 697628
+Feb 19 17:12:49 ubuntu gunicorn[697628]: [2025-02-19 17:12:49 +0000] [697628] [ERROR] Exception in worker process
+Feb 19 17:12:49 ubuntu gunicorn[697628]: Traceback (most recent call last):
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     worker.init_process()
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     self.load_wsgi()
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:49 ubuntu gunicorn[697628]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     self.callable = self.load()
+Feb 19 17:12:49 ubuntu gunicorn[697628]:                     ^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     return self.load_wsgiapp()
+Feb 19 17:12:49 ubuntu gunicorn[697628]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     return util.import_app(self.app_uri)
+Feb 19 17:12:49 ubuntu gunicorn[697628]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     mod = importlib.import_module(module)
+Feb 19 17:12:49 ubuntu gunicorn[697628]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:49 ubuntu gunicorn[697628]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:49 ubuntu gunicorn[697628]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:49 ubuntu gunicorn[697628]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:49 ubuntu gunicorn[697628]: ModuleNotFoundError: No module named 'django_palab'
+Feb 19 17:12:49 ubuntu gunicorn[697628]: [2025-02-19 17:12:49 +0000] [697628] [INFO] Worker exiting (pid: 697628)
+Feb 19 17:12:50 ubuntu gunicorn[697629]: [2025-02-19 17:12:50 +0000] [697629] [INFO] Booting worker with pid: 697629
+Feb 19 17:12:50 ubuntu gunicorn[697629]: [2025-02-19 17:12:50 +0000] [697629] [ERROR] Exception in worker process
+Feb 19 17:12:50 ubuntu gunicorn[697629]: Traceback (most recent call last):
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     worker.init_process()
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     self.load_wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697629]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     self.callable = self.load()
+Feb 19 17:12:50 ubuntu gunicorn[697629]:                     ^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     return self.load_wsgiapp()
+Feb 19 17:12:50 ubuntu gunicorn[697629]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     return util.import_app(self.app_uri)
+Feb 19 17:12:50 ubuntu gunicorn[697629]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     mod = importlib.import_module(module)
+Feb 19 17:12:50 ubuntu gunicorn[697629]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:50 ubuntu gunicorn[697629]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:50 ubuntu gunicorn[697629]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697629]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697629]: ModuleNotFoundError: No module named 'django_palab'
+Feb 19 17:12:50 ubuntu gunicorn[697629]: [2025-02-19 17:12:50 +0000] [697629] [INFO] Worker exiting (pid: 697629)
+Feb 19 17:12:50 ubuntu gunicorn[697626]: [2025-02-19 17:12:50 +0000] [697626] [ERROR] Worker (pid:697628) exited with code 3
+Feb 19 17:12:50 ubuntu gunicorn[697626]: [2025-02-19 17:12:50 +0000] [697626] [ERROR] Worker (pid:697629) was sent SIGTERM!
+Feb 19 17:12:50 ubuntu gunicorn[697626]: [2025-02-19 17:12:50 +0000] [697626] [ERROR] Shutting down: Master
+Feb 19 17:12:50 ubuntu gunicorn[697626]: [2025-02-19 17:12:50 +0000] [697626] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:50 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 1.
+Feb 19 17:12:50 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [INFO] Listening at: unix:/var/www/django-palab/gunicorn.sock (697632)
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [INFO] Using worker: sync
+Feb 19 17:12:50 ubuntu gunicorn[697633]: [2025-02-19 17:12:50 +0000] [697633] [INFO] Booting worker with pid: 697633
+Feb 19 17:12:50 ubuntu gunicorn[697633]: [2025-02-19 17:12:50 +0000] [697633] [ERROR] Exception in worker process
+Feb 19 17:12:50 ubuntu gunicorn[697633]: Traceback (most recent call last):
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     worker.init_process()
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     self.load_wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697633]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     self.callable = self.load()
+Feb 19 17:12:50 ubuntu gunicorn[697633]:                     ^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     return self.load_wsgiapp()
+Feb 19 17:12:50 ubuntu gunicorn[697633]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     return util.import_app(self.app_uri)
+Feb 19 17:12:50 ubuntu gunicorn[697633]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     mod = importlib.import_module(module)
+Feb 19 17:12:50 ubuntu gunicorn[697633]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:50 ubuntu gunicorn[697633]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:50 ubuntu gunicorn[697633]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697633]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697633]: ModuleNotFoundError: No module named 'django_palab'
+Feb 19 17:12:50 ubuntu gunicorn[697633]: [2025-02-19 17:12:50 +0000] [697633] [INFO] Worker exiting (pid: 697633)
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [ERROR] Worker (pid:697633) exited with code 3
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [ERROR] Shutting down: Master
+Feb 19 17:12:50 ubuntu gunicorn[697632]: [2025-02-19 17:12:50 +0000] [697632] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:50 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 2.
+Feb 19 17:12:50 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [INFO] Listening at: unix:/var/www/django-palab/gunicorn.sock (697635)
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [INFO] Using worker: sync
+Feb 19 17:12:50 ubuntu gunicorn[697639]: [2025-02-19 17:12:50 +0000] [697639] [INFO] Booting worker with pid: 697639
+Feb 19 17:12:50 ubuntu gunicorn[697639]: [2025-02-19 17:12:50 +0000] [697639] [ERROR] Exception in worker process
+Feb 19 17:12:50 ubuntu gunicorn[697639]: Traceback (most recent call last):
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     worker.init_process()
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     self.load_wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697639]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     self.callable = self.load()
+Feb 19 17:12:50 ubuntu gunicorn[697639]:                     ^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     return self.load_wsgiapp()
+Feb 19 17:12:50 ubuntu gunicorn[697639]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     return util.import_app(self.app_uri)
+Feb 19 17:12:50 ubuntu gunicorn[697639]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     mod = importlib.import_module(module)
+Feb 19 17:12:50 ubuntu gunicorn[697639]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:50 ubuntu gunicorn[697639]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:50 ubuntu gunicorn[697639]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697639]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697639]: ModuleNotFoundError: No module named 'django_palab'
+Feb 19 17:12:50 ubuntu gunicorn[697639]: [2025-02-19 17:12:50 +0000] [697639] [INFO] Worker exiting (pid: 697639)
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [ERROR] Worker (pid:697639) exited with code 3
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [ERROR] Shutting down: Master
+Feb 19 17:12:50 ubuntu gunicorn[697635]: [2025-02-19 17:12:50 +0000] [697635] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:50 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 3.
+Feb 19 17:12:50 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [INFO] Listening at: unix:/var/www/django-palab/gunicorn.sock (697641)
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [INFO] Using worker: sync
+Feb 19 17:12:50 ubuntu gunicorn[697642]: [2025-02-19 17:12:50 +0000] [697642] [INFO] Booting worker with pid: 697642
+Feb 19 17:12:50 ubuntu gunicorn[697642]: [2025-02-19 17:12:50 +0000] [697642] [ERROR] Exception in worker process
+Feb 19 17:12:50 ubuntu gunicorn[697642]: Traceback (most recent call last):
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     worker.init_process()
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     self.load_wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:50 ubuntu gunicorn[697642]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     self.callable = self.load()
+Feb 19 17:12:50 ubuntu gunicorn[697642]:                     ^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     return self.load_wsgiapp()
+Feb 19 17:12:50 ubuntu gunicorn[697642]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgiapp
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     return util.import_app(self.app_uri)
+Feb 19 17:12:50 ubuntu gunicorn[697642]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/util.py", line 371, in import_app
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     mod = importlib.import_module(module)
+Feb 19 17:12:50 ubuntu gunicorn[697642]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+Feb 19 17:12:50 ubuntu gunicorn[697642]:     return _bootstrap._gcd_import(name[level:], package, level)
+Feb 19 17:12:50 ubuntu gunicorn[697642]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+Feb 19 17:12:50 ubuntu gunicorn[697642]:   File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+Feb 19 17:12:50 ubuntu gunicorn[697642]: ModuleNotFoundError: No module named 'django_palab'
+Feb 19 17:12:50 ubuntu gunicorn[697642]: [2025-02-19 17:12:50 +0000] [697642] [INFO] Worker exiting (pid: 697642)
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [ERROR] Worker (pid:697642) exited with code 3
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [ERROR] Shutting down: Master
+Feb 19 17:12:50 ubuntu gunicorn[697641]: [2025-02-19 17:12:50 +0000] [697641] [ERROR] Reason: Worker failed to boot.
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;39m[0;1;31m[0;1;39mgunicorn.service: Main process exited, code=exited, status=3/NOTIMPLEMENTED[0m
+Feb 19 17:12:50 ubuntu systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mgunicorn.service: Failed with result 'exit-code'.[0m
+Feb 19 17:12:51 ubuntu systemd[1]: gunicorn.service: Scheduled restart job, restart counter is at 4.
+Feb 19 17:12:51 ubuntu systemd[1]: Started gunicorn.service - gunicorn daemon for Django project.
+Feb 19 17:12:51 ubuntu gunicorn[697644]: [2025-02-19 17:12:51 +0000] [697644] [INFO] Starting gunicorn 22.0.0
+Feb 19 17:12:51 ubuntu gunicorn[697644]: [2025-02-19 17:12:51 +0000] [697644] [INFO] Listening at: unix:/var/www/django-palab/gunicorn.sock (697644)
+Feb 19 17:12:51 ubuntu gunicorn[697644]: [2025-02-19 17:12:51 +0000] [697644] [INFO] Using worker: sync
+Feb 19 17:12:51 ubuntu gunicorn[697645]: [2025-02-19 17:12:51 +0000] [697645] [INFO] Booting worker with pid: 697645
+Feb 19 17:12:51 ubuntu gunicorn[697645]: [2025-02-19 17:12:51 +0000] [697645] [ERROR] Exception in worker process
+Feb 19 17:12:51 ubuntu gunicorn[697645]: Traceback (most recent call last):
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/arbiter.py", line 609, in spawn_worker
+Feb 19 17:12:51 ubuntu gunicorn[697645]:     worker.init_process()
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 134, in init_process
+Feb 19 17:12:51 ubuntu gunicorn[697645]:     self.load_wsgi()
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/workers/base.py", line 146, in load_wsgi
+Feb 19 17:12:51 ubuntu gunicorn[697645]:     self.wsgi = self.app.wsgi()
+Feb 19 17:12:51 ubuntu gunicorn[697645]:                 ^^^^^^^^^^^^^^^
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/base.py", line 67, in wsgi
+Feb 19 17:12:51 ubuntu gunicorn[697645]:     self.callable = self.load()
+Feb 19 17:12:51 ubuntu gunicorn[697645]:                     ^^^^^^^^^^^
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 58, in load
+Feb 19 17:12:51 ubuntu gunicorn[697645]:     return self.load_wsgiapp()
+Feb 19 17:12:51 ubuntu gunicorn[697645]:            ^^^^^^^^^^^^^^^^^^^
+Feb 19 17:12:51 ubuntu gunicorn[697645]:   File "/var/www/django-palab/env/lib/python3.12/site-packages/gunicorn/app/wsgiapp.py", line 48, in load_wsgi

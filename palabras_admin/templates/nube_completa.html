@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nube de Palabras Completa</title>
+  <style>
+    /* Estilos básicos y layout similar al dashboard */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background-color: #f0f2f5; color: #333; }
+    .dashboard-container { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 250px; background-color: #ffffff; border-right: 1px solid #ddd; padding: 20px;
+    }
+    .sidebar h2 { font-size: 18px; margin-bottom: 20px; }
+    .sidebar ul { list-style: none; padding-left: 0; margin-bottom: 20px; }
+    .sidebar ul li { margin-bottom: 10px; padding: 8px; border-radius: 4px; transition: background-color 0.2s; }
+    .sidebar ul li:hover { background-color: #f2f2f2; cursor: pointer; }
+    .sidebar ul li a { text-decoration: none; color: #333; display: block; }
+    .sidebar form { margin-bottom: 20px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group-input {
+      width: 100%; color: #161b33; font-size: 16px; background-color: #E9E9E9;
+      border: 1px solid #E9E9E9; border-radius: 5px; height: 36px; padding-left: 10px; margin-bottom: 10px;
+    }
+    .date-container { margin: 10px 0; }
+    .date-input-group { display: flex; flex-direction: column; gap: 5px; }
+    .styled-date-input {
+      padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%;
+    }
+    .date-label { font-size: 14px; color: #555; }
+    .date-separator { font-weight: bold; font-size: 14px; color: #666; }
+    .button-group { margin-top: 10px; }
+    .button-group button {
+      width: 100%; font-size: 16px; border-radius: 4px; color: #fff; height: 36px; cursor: pointer;
+      background: #3d5a80; border: none; transition: 0.3s;
+    }
+    .button-group button:hover { opacity: 0.9; }
+    .main-content { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-x: auto; }
+    .nube-container {
+      max-width: 800px; margin: 20px auto;
+      border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .nube-container img {
+      width: 100%; height: auto; border-radius: 8px;
+    }
+    @media (max-width: 768px) {
+      .dashboard-container { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #ddd; }
+      .main-content { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Escucha Social WhatsApp</h2>
+      <ul>
+        <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+        <li><a href="{% url 'tabla_datos' %}">Tabla de Datos</a></li>
+        <li><a href="{% url 'grafo_completo' %}">Grafo</a></li>
+        <li><a href="{% url 'login' %}">Cerrar Sesión</a></li>
+      </ul>
+      <h2>Filtros de Búsqueda</h2>
+      <form method="GET" action="{% url 'dashboard' %}">
+        {% if user.is_staff %}
+          <div class="form-group">
+            <input type="text" class="form-group-input" id="cliente" name="cliente" value="{{ nombre_cliente }}" placeholder="Cliente">
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-group-input" id="estado" name="estado" value="{{ estado }}" placeholder="Estado">
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-group-input" id="municipio" name="municipio" value="{{ municipio }}" placeholder="Municipio">
+          </div>
+        {% endif %}
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder="Grupo">
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Celular">
+        </div>
+        <div class="date-container">
+          <div class="date-input-group">
+            <label for="fecha_inicio" class="date-label">Desde:</label>
+            <input type="date" class="styled-date-input" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            <span class="date-separator">Hasta:</span>
+            <input type="date" class="styled-date-input" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+          </div>
+        </div>
+        <div class="button-group">
+          <button type="submit">Aplicar Filtros</button>
+        </div>
+      </form>
+      {% if user.is_staff %}
+      <h2>Administración</h2>
+      <ul>
+        <li><a href="/admin/auth/user/add/">Crear Usuarios</a></li>
+      </ul>
+      {% endif %}
+    </div>
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <h1>Nube de Palabras Completa</h1>
+      <div class="nube-container">
+        {% if imagen_nube %}
+          <img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
+        {% else %}
+          <p>No se encontró imagen de la nube de palabras.</p>
+        {% endif %}
+      </div>
+      
+    </div>
+  </div>
+</body>
+</html>
