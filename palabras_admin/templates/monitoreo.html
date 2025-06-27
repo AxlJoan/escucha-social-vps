@@ -213,6 +213,8 @@
       to { opacity: 1; }
     }
   </style>
+    <!-- Incluir Chart.js para la gráfica del Top 10 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <!-- Pantalla de carga -->
@@ -275,7 +277,7 @@
 
       <div class="form-group">
         <input type="text" class="form-group-input" id="number2" name="number2" 
-              value="{{ request.GET.number2 }}" placeholder="Celular">
+              value="{{ request.GET.number2 }}" placeholder="Identificador">
       </div>
 
       <div class="date-container">
@@ -302,11 +304,101 @@
         <h3>Total Mensajes</h3>
         <p>{{ total_mensajes }}</p>
       </div>
-      <div class="metric-card">
-        <h3>Total Mensajes Monitoreados</h3>
-        <p>{{ total_palabras }}</p>
-      </div>
     </div>
+
+    <!-- Sección de gráficos (ejemplos) -->
+      <!-- Sección de gráficos: Top 10 Palabras en gráfica de barras -->
+      <div class="charts-row">
+        <div class="chart-container">
+          <h4>Top 10 Palabras</h4>
+          {% if top_palabras %}
+          <canvas id="topWordsChart"></canvas>
+          {% else %}
+          <p>No hay datos para mostrar.</p>
+          {% endif %}
+        </div>
+
+        <!-- Análisis de Sentimientos (Placeholder o imagen) -->
+        <div class="chart-container">
+            <h4>Análisis de Sentimientos</h4>
+            {% if analisis_sentimientos %}
+              <!-- Envolvemos el canvas en un contenedor con tamaño fijo -->
+              <div style="width:300px; height:300px; margin:0 auto;">
+                <canvas id="sentimentPieChart"></canvas>
+              </div>
+            {% else %}
+              <p>No hay datos para análisis de sentimientos.</p>
+            {% endif %}
+          </div>
+          
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              {% if analisis_sentimientos %}
+                const sentimentLabels = [];
+                const sentimentData = [];
+                {% for key, value in analisis_sentimientos.items %}
+                  sentimentLabels.push("{{ key }}");
+                  sentimentData.push({{ value }});
+                {% endfor %}
+                
+                const ctx = document.getElementById('sentimentPieChart').getContext('2d');
+                new Chart(ctx, {
+                  type: 'pie',
+                  data: {
+                    labels: sentimentLabels,
+                    datasets: [{
+                      data: sentimentData,
+                      backgroundColor: [
+                        'rgba(153, 204, 51, 0.6)',
+                        'rgba(255, 204, 51, 0.6)',
+                        'rgba(255, 102, 51, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(54, 162, 235, 0.6)'
+                      ],
+                      borderColor: [
+                        'rgba(153, 204, 51, 1)',
+                        'rgba(255, 204, 51, 1)',
+                        'rgba(255, 102, 51, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(54, 162, 235, 1)'
+                      ],
+                      borderWidth: 1
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' },
+                    tooltip: {
+                      enabled: false
+                    } }
+                  }
+                });
+              {% endif %}
+            });
+          </script>
+
+      <!-- Sección inferior: Word Cloud y grafo -->
+      <div class="bottom-row">
+        <div class="bottom-item">
+          <h4>Nube de Palabras</h4>
+          {% if imagen_nube %}
+            <img src="data:image/png;base64,{{ imagen_nube }}" alt="Nube de Palabras">
+          {% else %}
+            <p>No se encontró imagen de la nube de palabras.</p>
+          {% endif %}
+        </div>
+        <div class="bottom-item">
+          <h4>Grafo Interactivo</h4>
+          {% if grafo_html %}
+            {% autoescape off %}
+            {{ grafo_html }}
+            {% endautoescape %}
+          {% else %}
+            <p>No hay datos para generar el grafo.</p>
+          {% endif %}
+        </div>
+      </div>
 
     <!-- Mostrar tabla de mensajes monitoreados -->
     {% for palabra, datos in tablas_palabras.items %}
@@ -316,7 +408,7 @@
           <tr>
             <th class="pad-col group-col">Fecha</th>
             <th class="pad-col group-col">Grupo</th>
-            <th class="pad-col group-col">Número</th>
+            <th class="pad-col group-col">Identificador</th>
             <th>Mensaje</th>
           </tr>
         </thead>
@@ -349,6 +441,66 @@
     {% endfor %}
   </div>
 </div>
+
+  <!-- Script para la gráfica de Top 10 Palabras -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('topWordsChart').getContext('2d');
+      // Crear arrays para etiquetas y valores a partir de top_palabras
+      const labels = [
+        {% for palabra, freq in top_palabras %}
+          "{{ palabra }}",
+        {% endfor %}
+      ];
+      const dataValues = [
+        {% for palabra, freq in top_palabras %}
+          {{ freq }},
+        {% endfor %}
+      ];
+      // Definir arrays de colores (uno para cada barra, se asume que top_palabras tiene hasta 10 elementos)
+      const backgroundColors = [
+          'rgba(0, 255, 0, 0.6)',   // Verde (fuerte)
+          'rgba(51, 204, 51, 0.6)',
+          'rgba(102, 153, 51, 0.6)',
+          'rgba(153, 204, 51, 0.6)',
+          'rgba(204, 255, 51, 0.6)', // Amarillo (suave)
+          'rgba(255, 255, 0, 0.6)',  // Amarillo (intenso)
+          'rgba(255, 204, 51, 0.6)',
+          'rgba(255, 153, 51, 0.6)',
+          'rgba(255, 102, 51, 0.6)', // Naranja (suave)
+          'rgba(255, 0, 0, 0.6)'     // Rojo (fuerte)
+      ];
+
+      const borderColors = [
+          'rgba(0, 255, 0, 1)',  
+          'rgba(51, 204, 51, 1)',
+          'rgba(102, 153, 51, 1)',
+          'rgba(153, 204, 51, 1)',
+          'rgba(204, 255, 51, 1)', 
+          'rgba(255, 255, 0, 1)',  
+          'rgba(255, 204, 51, 1)',
+          'rgba(255, 153, 51, 1)',
+          'rgba(255, 102, 51, 1)', 
+          'rgba(255, 0, 0, 1)'     
+      ];
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Frecuencia',
+            data: dataValues,
+            backgroundColor: backgroundColors.slice(0, dataValues.length),
+            borderColor: borderColors.slice(0, dataValues.length),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    });
+  </script>
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {

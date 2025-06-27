@@ -394,7 +394,7 @@ def insertar_mensajes_view(request):
             conn = mysql.connector.connect(
                 host='158.69.26.160',
                 user='admin',
-                password='S3gur1d4d2025',
+                password='F@c3b00k',
                 database='data_wa'
             )
             cursor = conn.cursor()
@@ -534,7 +534,7 @@ def monitoreo_view(request):
     df = cargar_datos_csv()
     df = df[df["cliente"] == nombre_cliente]
 
-    # 5. Aplicar filtros adicionales antes de segmentar por palabras
+    # 5. Aplicar filtros adicionales
     text_data = request.GET.get('text_data', '')
     group_name = request.GET.get('group_name', '')
     number2 = request.GET.get('number2', '')
@@ -551,15 +551,30 @@ def monitoreo_view(request):
         df = df[df["timestamp"] >= pd.to_datetime(fecha_inicio)]
     if fecha_fin:
         df = df[df["timestamp"] <= pd.to_datetime(fecha_fin)]
-
-    # 6. Métricas generales (antes de segmentar por palabras)
-    total_mensajes = len(df)  # Total de mensajes filtrados antes de aplicar palabras monitoreadas
-    total_palabras_global = 0  # Suma total de ocurrencias de todas las palabras monitoreadas
-
-    # 7. Obtener palabra seleccionada (si se ha hecho clic en una palabra específica)
+    
+    # 11. Obtener palabra seleccionada
     palabra_seleccionada = request.GET.get('palabra_seleccionada', '')
 
-    # 8. Filtrar datos por cada palabra monitoreada (y aplicar filtros adicionales)
+    # 6. Generar el grafo de relaciones
+    grafo_html = generar_grafo(nombre_cliente, group_name, number2, fecha_inicio, fecha_fin)
+
+    # 7. Análisis de sentimientos
+    analisis_sentimientos = generar_analisis_sentimientos(nombre_cliente, None, None, group_name, number2, fecha_inicio, fecha_fin, palabra_seleccionada)
+
+    # 8. Generar nube de palabras
+    imagen_nube = generar_nube_palabras(nombre_cliente, None, None, group_name, number2, fecha_inicio, fecha_fin, palabra_seleccionada)
+
+    # 9. Generar top de palabras más usadas
+    top_palabras = generar_top_palabras(nombre_cliente, None, None, group_name, number2, fecha_inicio, fecha_fin, palabra_seleccionada)
+
+    # 10. Métricas generales
+    if palabra_seleccionada:
+        total_mensajes = len(df[df["text_data"].fillna('').str.contains(palabra_seleccionada, case=False, na=False)])
+    else:
+        total_mensajes = len(df)  # Si no hay palabra seleccionada, contar todos los mensajes
+    total_palabras_global = 0  
+
+    # 12. Filtrar datos por cada palabra monitoreada
     tablas_palabras = {}
     total_palabras = {}
 
@@ -568,35 +583,38 @@ def monitoreo_view(request):
         if not df_filtrado.empty:
             tablas_palabras[palabra] = df_filtrado.to_dict(orient='records')
             total_palabras[palabra] = df_filtrado["text_data"].fillna('').str.lower().str.count(palabra.lower()).sum()
-            total_palabras_global += total_palabras[palabra]  # Sumar al total general
+            total_palabras_global += total_palabras[palabra] 
 
-    # 9. Si el usuario seleccionó una palabra específica, solo mostramos esa tabla
+    # 13. Si el usuario seleccionó una palabra específica, solo mostramos esa tabla
     if palabra_seleccionada and palabra_seleccionada in tablas_palabras:
         tablas_palabras = {palabra_seleccionada: tablas_palabras[palabra_seleccionada]}
 
-    # 10. Paginación para cada tabla (50 registros por página)
+    # 14. Paginación para cada tabla (50 registros por página)
     datos_paginados = {}
     for palabra, datos in tablas_palabras.items():
         paginador = Paginator(datos, 50)
         page_number = request.GET.get('page')
         datos_paginados[palabra] = paginador.get_page(page_number)
 
-    # 11. Contexto para la plantilla
+    # 15. Contexto para la plantilla
     context = {
-        'monitored_words': monitored_words,  
-        'total_mensajes': total_mensajes,       # Mantengo tu métrica original
-        'total_palabras': total_palabras_global,  # Suma total de todas las palabras monitoreadas
-        'tablas_palabras': datos_paginados,    # Cada palabra tiene su propia tabla paginada
-        'palabra_seleccionada': palabra_seleccionada,  
-        'text_data': text_data,  
+        'monitored_words': monitored_words,
+        'total_mensajes': total_mensajes,
+        'total_palabras': total_palabras_global,
+        'tablas_palabras': datos_paginados,
+        'palabra_seleccionada': palabra_seleccionada,
+        'text_data': text_data,
         'group_name': group_name,
-        'number2': number2,       
+        'number2': number2,
         'fecha_inicio': fecha_inicio,
-        'fecha_fin': fecha_fin
+        'fecha_fin': fecha_fin,
+        'grafo_html': grafo_html,
+        'analisis_sentimientos': analisis_sentimientos,
+        'imagen_nube': imagen_nube,
+        'top_palabras': top_palabras
     }
 
     return render(request, 'monitoreo.html', context)
-
 
 @login_required
 def eliminar_palabra(request, palabra):

@@ -296,7 +296,7 @@
           <input type="text" class="form-group-input" id="group_name" name="group_name" value="{{ group_name }}" placeholder="Grupo">
         </div>
         <div class="form-group">
-          <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Celular">
+          <input type="text" class="form-group-input" id="number2" name="number2" value="{{ number2 }}" placeholder="Identificador">
         </div>
         <div class="date-container">
           <div class="date-input-group">
@@ -361,7 +361,7 @@
           <p>{{ mensajes_totales }}</p>
         </div>
         <div class="metric-card">
-          <h3>Números Extraídos</h3>
+          <h3>Usuarios Totales en Grupos</h3>
           <p>{{ numeros_totales }}</p>
         </div>
         <div class="metric-card">
@@ -476,7 +476,7 @@
           {% csrf_token %}
           <input type="text" name="cliente" placeholder="Cliente" required>
           <input type="text" name="text_data" placeholder="Mensaje" required>
-          <input type="text" name="number2" placeholder="Celular" required>
+          <input type="text" name="number2" placeholder="Identificador" required>
           <input type="text" name="estado" placeholder="Estado" required>
           <input type="text" name="municipio" placeholder="Municipio" required>
           <input type="text" name="group_name" placeholder="Grupo (opcional)">
@@ -500,7 +500,7 @@
               {% endif %}
               <th class="pad-col group-col">Fecha</th>
               <th class="pad-col group-col">Grupo</th>
-              <th class="pad-col number-col">Número</th>
+              <th class="pad-col number-col">Identificador</th>
               <th>Mensaje</th>
             </tr>
           </thead>

@@ -97,8 +97,8 @@ Entradas:
 Salidas:
             - Una lista de las 10 palabras más frecuentes en los textos, excluyendo stopwords y números.
 '''
-def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin, text_data=None):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, text_data, fecha_inicio, fecha_fin)
     if df is None or df.empty:
         return []
     # Combinar todo el texto de la columna 'text_data'
@@ -114,7 +114,7 @@ def generar_top_palabras(nombre_cliente, estado, municipio, group_name, number2,
     'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
     'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos','días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
     'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
+    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 'bit', 'ly', 'facebook', 'https', 'com', 'http', '-', 'whatsapp', "_",  "-",
     'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
     'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
     'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
@@ -145,8 +145,8 @@ Entradas:
 Salidas:
             - Texto combinado de los mensajes filtrados, sin stopwords, listo para generar una nube de palabras.
 '''
-def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin, text_data=None):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, text_data, fecha_inicio, fecha_fin)
     if df is None or df.empty:
         return ""
     texto_combinado = ' '.join(df['text_data'].dropna())
@@ -159,7 +159,7 @@ def generar_nube_palabras(nombre_cliente, estado, municipio, group_name, number2
     'para', 'por', 'porque', 'que', 'quien', 'quienes', 'se', 'su', 'sus', 'tanto', 'tan', 'tanto', 'te', 'ti', 'tus', 'un', 'una', 'unas', 'uno', 'unos', 'usted', 've', 'vez', 'vosotros', 'ya', 'él', 'ella', 'ellos', 'ellas', 'https', '5', 'com', 'chat', 'www',
     'hola', 'si', 'no', 'x', 'aquí', 'aqui', 'cómo', 'como', 'día', 'buenos','días', 'dia', 'dias', 'noches', 'noche', 't', 'xd', 'a', 'acá', 'ahí', 'ajena', 'ajeno', 'ajenos', 'al', 'algo', 'algún', 'alguna', 'alguno', 'algunos', 'allá', 'allí', 'ambos', 'ante', 'antes', 'aquel', 'aquella', 
     'aquello', 'aquellos', 'aquí', 'arriba', 'así', 'atrás', 'aun', 'aunque', 'bajo', 'bastante', 'bien', 'cabe', 'cada', 'casi', 'cierto', 'cierta', 'ciertos', 'como', 'con', 'conmigo', 'conseguimos', 'conseguir', 'consigo', 'consigue', 'consiguen', 'consigues', 'contigo', 'contra', 'cual', 'cuales', 
-    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 
+    'cualquier', 'cualquiera', 'cualquiera', 'cuan', 'cuando', 'cuanto', 'cuanta', 'cuantos', 'de', 'dejar', 'del', 'demás', 'demasiada', 'demasiado', 'dentro', 'bit', 'ly', 'facebook', 'https', 'com', 'http', '-', 'whatsapp', "_",  "-",
     'desde', 'donde', 'dos', 'el', 'él', 'ella', 'ello', 'ellos', 'empleáis', 'emplean', 'emplear', 'empleas', 'empleo', 'en', 'encima', 'entonces', 'entre', 'era', 'eras', 'eramos', 'eran', 'eres', 'es', 'esa', 'ese', 'eso', 'esos', 'esta', 'estas', 'estaba', 'estado', 'estáis', 'estamos', 
     'están', 'estar', 'este', 'esto', 'estos', 'estoy', 'etc', 'fin', 'fue', 'fueron', 'fui', 'fuimos', 'gueno', 'ha', 'hace', 'haces', 'hacéis', 'hacemos', 'hacen', 'hacer', 'hacia', 'hago', 'hasta', 'incluso', 'intenta', 'intentas', 'intentáis', 'intentamos', 'intentan', 'intentar', 'intento', 
     'ir', 'jamás', 'junto', 'juntos', 'la', 'lo', 'los', 'largo', 'más', 'me', 'menos', 'mi', 'mis', 'mía', 'mías', 'mientras', 'mío', 'míos', 'misma', 'mismo', 'mismos', 'modo', 'mucha', 'muchas', 'muchísima', 'muchísimo', 'muchos', 'muy', 'nada', 'ni', 'ningún', 'ninguna', 'ninguno', 'ningunos', 
@@ -211,12 +211,14 @@ Salidas:
 '''
 import mysql.connector
 
+import mysql.connector
+
 def obtener_numeros_totales(nombre_cliente):
-    if not nombre_cliente:  # Si es None o vacío, evitar consulta
+    if not nombre_cliente:
         return 0
     
     MYSQL_USER = "admin"
-    MYSQL_PASS = "S3gur1d4d2025"
+    MYSQL_PASS = "F@c3b00k"
     MYSQL_HOST = "158.69.26.160"
     MYSQL_DB = "data_wa"
 
@@ -228,22 +230,34 @@ def obtener_numeros_totales(nombre_cliente):
             database=MYSQL_DB
         )
         cursor = con.cursor(dictionary=True)
-        
+
         query = """
-        SELECT total, fecha_subida FROM total_participantes
-        WHERE cliente = %s
-        ORDER BY fecha_subida DESC LIMIT 1;
+        SELECT SUM(total) AS total_sumado FROM (
+            SELECT total
+            FROM (
+                SELECT *,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY cliente, dispositivo_id
+                           ORDER BY fecha_subida DESC
+                       ) AS rn
+                FROM total_participantes
+                WHERE cliente = %s
+            ) AS sub
+            WHERE rn = 1
+        ) AS totales
         """
         cursor.execute(query, (nombre_cliente,))
         result = cursor.fetchone()
-        
-        return result['total'] if result else 0
+
+        return result['total_sumado'] if result and result['total_sumado'] else 0
+
     except mysql.connector.Error as e:
         print(f"Error en MySQL: {e}")
         return 0
     finally:
         if 'con' in locals():
             con.close()
+
 
 '''
 Nombre de la función: obtener_grupos_extraidos
@@ -307,8 +321,8 @@ Entradas:
 Salidas: 
             - dict - Diccionario con el conteo de sentimientos (Negativo, Neutral, Positivo) o un error.
 '''
-def generar_analisis_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin):
-    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin)
+def generar_analisis_sentimientos(nombre_cliente, estado, municipio, group_name, number2, fecha_inicio, fecha_fin, text_data=None):
+    df = obtener_datos_cliente(nombre_cliente, estado, municipio, group_name, number2, text_data, fecha_inicio, fecha_fin)
     if df is None or df.empty:
         return {}
     

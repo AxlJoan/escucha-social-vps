@@ -24,7 +24,7 @@ def exportar_datos_csv():
         conn = mysql.connector.connect(
             host='158.69.26.160',
             user='admin',
-            password='S3gur1d4d2025',
+            password='F@c3b00k',
             database='data_wa'
         )
         cursor = conn.cursor()
